@@ -7,6 +7,7 @@ from ..enums.order_status import OrderStatus
 
 class Order(DatetimeDecoratedBase):
     market: Mapped[str] = mapped_column(nullable=False)
+    commission: Mapped[float] = mapped_column(nullable=False)
     price: Mapped[float] = mapped_column(nullable=False)
     stop_loss: Mapped[float]
     quantity: Mapped[float] = mapped_column(nullable=False)
