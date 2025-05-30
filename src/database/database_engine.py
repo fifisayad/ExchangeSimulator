@@ -1,4 +1,4 @@
-from src.config.config import DatabaseConfig
+from .. import DatabaseConfig
 from fifi import SQLAlchemyEngineBase
 
 

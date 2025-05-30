@@ -2,8 +2,7 @@ from fifi.models.datetime_decorated_base import DatetimeDecoratedBase
 from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enums.asset import Asset
-
+from ..enums.asset import Asset
 from .portfolio import Portfolio
 
 
