@@ -1,5 +1,5 @@
 from typing import List
-from fifi.models.datetime_decorated_base import DatetimeDecoratedBase
+from fifi import DatetimeDecoratedBase
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .balance import Balance
