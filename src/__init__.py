@@ -1,4 +1,4 @@
-__all__ = ["DatabaseConfig", "DatabaseEngine"]
+__all__ = ["DatabaseEngine"]
 
-from config.config import DatabaseConfig
+from config.config import *
 from database.database_engine import DatabaseEngine
