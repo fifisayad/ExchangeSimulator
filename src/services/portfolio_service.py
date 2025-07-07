@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 from fifi import Repository
 
 from src.schemas.portfolio_schema import PortfolioSchema
 from ..models.portfolio import Portfolio
+from ..models.balance import Balance
 
 
 class PortfolioService:
@@ -18,3 +19,17 @@ class PortfolioService:
     async def create_portfolio(self, name: str) -> Optional[Portfolio]:
         new_portfolio = PortfolioSchema(name=name)
         return await self.portfolio_repo.create(data=new_portfolio)
+
+    async def get_portfolio_balances(
+        self, id: Optional[str], name: Optional[str]
+    ) -> Optional[List[Balance]]:
+        if not id and not name:
+            raise ValueError("One of id or name argument must be gave!")
+        if id:
+            portfolio = await self.get_portfolio_by_id(id=id)
+        if name:
+            portfolio = await self.get_portfolio_by_name(name=name)
+        else:
+            return None
+        if portfolio:
+            return portfolio.balances
