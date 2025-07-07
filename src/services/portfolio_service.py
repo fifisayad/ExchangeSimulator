@@ -27,9 +27,19 @@ class PortfolioService:
             raise ValueError("One of id or name argument must be gave!")
         if id:
             portfolio = await self.get_portfolio_by_id(id=id)
-        if name:
+        elif name:
             portfolio = await self.get_portfolio_by_name(name=name)
         else:
             return None
         if portfolio:
             return portfolio.balances
+
+    async def remove_portfolio(self, id: Optional[str], name: Optional[str]) -> int:
+        if not id and not name:
+            raise ValueError("One of id or name argument must be gave!")
+        if id:
+            return await self.portfolio_repo.remove_by_id(id_=id)
+        elif name:
+            return await self.portfolio_repo.remove_by_id(id_=name, column="name")
+        else:
+            return 0
