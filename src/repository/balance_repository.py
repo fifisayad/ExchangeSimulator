@@ -18,7 +18,8 @@ class BalanceRepository(Repository):
         model (Type[Balance]): The SQLAlchemy model associated with this repository.
     """
 
-    model = Balance
+    def __init__(self):
+        super().__init__(model=Balance)
 
     @db_async_session
     async def get_all_balances(

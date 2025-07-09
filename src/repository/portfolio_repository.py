@@ -15,7 +15,8 @@ class PortfolioRepository(Repository):
         portfolio_repo (Repository): Repository instance for Portfolio model interactions.
     """
 
-    model = Portfolio
+    def __init__(self):
+        super().__init__(model=Portfolio)
 
     async def get_by_name(self, name: str) -> Optional[Portfolio]:
         """

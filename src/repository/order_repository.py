@@ -19,7 +19,8 @@ class OrderRepository(Repository):
         model (Type[Order]): The SQLAlchemy model associated with this repository.
     """
 
-    model = Order
+    def __init__(self):
+        super().__init__(model=Order)
 
     @db_async_session
     async def get_all_order(
