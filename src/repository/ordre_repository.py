@@ -9,6 +9,15 @@ from ..models.order import Order
 
 
 class OrderRepository(Repository):
+    """
+    Repository class for handling database operations related to the Order model.
+
+    This class provides asynchronous methods to retrieve orders from the database,
+    with support for filtering by order status or portfolio ID, and optional row-level locking.
+
+    Attributes:
+        model (Type[Order]): The SQLAlchemy model associated with this repository.
+    """
 
     model = Order
 
@@ -19,6 +28,20 @@ class OrderRepository(Repository):
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Order]:
+        """
+        Retrieve all orders, optionally filtered by status.
+
+        Args:
+            status (Optional[OrderStatus]): The status to filter orders by. If None, returns all orders.
+            with_for_update (bool, optional): Whether to lock the selected rows using FOR UPDATE. Defaults to False.
+            session (Optional[AsyncSession], optional): An optional SQLAlchemy AsyncSession. If not provided, one must be available via the db_async_session decorator.
+
+        Returns:
+            List[Order]: A list of Order instances matching the query.
+
+        Raises:
+            NotExistedSessionException: If no valid session is provided or available.
+        """
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model)
@@ -38,6 +61,20 @@ class OrderRepository(Repository):
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Order]:
+        """
+        Retrieve all orders associated with a specific portfolio ID.
+
+        Args:
+            portfolio_id (str): The portfolio ID to filter orders by.
+            with_for_update (bool, optional): Whether to lock the selected rows using FOR UPDATE. Defaults to False.
+            session (Optional[AsyncSession], optional): An optional SQLAlchemy AsyncSession. If not provided, one must be available via the db_async_session decorator.
+
+        Returns:
+            List[Order]: A list of Order instances associated with the given portfolio ID.
+
+        Raises:
+            NotExistedSessionException: If no valid session is provided or available.
+        """
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model).where(self.model.portfolio_id == portfolio_id)
