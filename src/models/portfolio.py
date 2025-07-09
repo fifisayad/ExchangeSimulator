@@ -7,6 +7,11 @@ from .order import Order
 
 
 class Portfolio(DatetimeDecoratedBase):
+    __tablename__ = "portfolio"
+    # columns
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
-    orders: Mapped[List[Order]] = relationship(back_populates="portfolio")
-    balances: Mapped[List[Balance]] = relationship(back_populates="portfolio")
+    # relationships
+    orders: Mapped[List[Order]] = relationship("order", back_populates="portfolio")
+    balances: Mapped[List[Balance]] = relationship(
+        "balance", back_populates="portfolio"
+    )

@@ -7,7 +7,9 @@ from .portfolio import Portfolio
 
 
 class Balance(DatetimeDecoratedBase):
-    portfolio_id: Mapped[int] = mapped_column(
+    __tablename__ = "balance"
+    # columns
+    portfolio_id: Mapped[str] = mapped_column(
         ForeignKey("portfolio.id"), nullable=False
     )
     asset: Mapped[Asset] = mapped_column(nullable=False)
@@ -20,4 +22,5 @@ class Balance(DatetimeDecoratedBase):
     frozen: Mapped[float] = mapped_column(
         CheckConstraint("value >= 0", name="ck_value_positive"), nullable=False
     )
-    portfolio: Mapped[Portfolio] = relationship(back_populates="balances")
+    # relationships
+    portfolio: Mapped[Portfolio] = relationship("portfolio", back_populates="balances")
