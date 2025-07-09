@@ -31,14 +31,13 @@ class PortfolioRepository(Repository):
 
     async def remove_by_name(self, name: str) -> int:
         """
-        Remove a portfolio identified by either ID or name.
+        Remove a portfolio identified by name.
 
         Args:
-            id (Optional[str]): The ID of the portfolio to remove.
             name (Optional[str]): The name of the portfolio to remove.
 
         Raises:
-            ValueError: If neither ID nor name is provided.
+            ValueError: If name is not provided.
 
         Returns:
             int: The number of records deleted (typically 1 if successful, 0 otherwise).
