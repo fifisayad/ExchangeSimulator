@@ -3,24 +3,25 @@ from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..enums.asset import Asset
-from .portfolio import Portfolio
 
 
 class Balance(DatetimeDecoratedBase):
-    __tablename__ = "balance"
+    __tablename__ = "balances"
     # columns
     portfolio_id: Mapped[str] = mapped_column(
-        ForeignKey("portfolio.id"), nullable=False
+        ForeignKey("portfolios.id"), nullable=False
     )
     asset: Mapped[Asset] = mapped_column(nullable=False)
     quantity: Mapped[float] = mapped_column(
-        CheckConstraint("value >= 0", name="ck_value_positive"), nullable=False
+        CheckConstraint("quantity >= 0", name="ck_value_positive"), nullable=False
     )
     available: Mapped[float] = mapped_column(
-        CheckConstraint("value >= 0", name="ck_value_positive"), nullable=False
+        CheckConstraint("available >= 0", name="ck_value_positive"), nullable=False
     )
     frozen: Mapped[float] = mapped_column(
-        CheckConstraint("value >= 0", name="ck_value_positive"), nullable=False
+        CheckConstraint("frozen >= 0", name="ck_value_positive"), nullable=False
     )
     # relationships
-    portfolio: Mapped[Portfolio] = relationship("portfolio", back_populates="balances")
+    portfolio: Mapped["Portfolio"] = relationship(
+        "Portfolio", back_populates="balances"
+    )
