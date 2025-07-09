@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from fifi import Repository, db_async_session
 from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import select
@@ -18,7 +18,7 @@ class OrderRepository(Repository):
         status: Optional[OrderStatus],
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
-    ):
+    ) -> List[Order]:
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model)
@@ -29,4 +29,21 @@ class OrderRepository(Repository):
             stmt = stmt.with_for_update()
 
         results = await session.execute(stmt)
-        return results.all()
+        return list(results.scalars().all())
+
+    @db_async_session
+    async def get_orders_by_portfolio_id(
+        self,
+        portfolio_id: str,
+        with_for_update: bool = False,
+        session: Optional[AsyncSession] = None,
+    ) -> List[Order]:
+        if not session:
+            raise NotExistedSessionException("session is not existed")
+        stmt = select(self.model).where(self.model.portfolio_id == portfolio_id)
+
+        if with_for_update:
+            stmt = stmt.with_for_update()
+
+        results = await session.execute(stmt)
+        return list(results.scalars().all())
