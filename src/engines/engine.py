@@ -8,19 +8,19 @@ from fifi import GetLogger
 LOGGER = GetLogger().get()
 
 
-class Service(ABC):
+class Engine(ABC):
     """
-    Abstract base class for a threaded asynchronous service using its own event loop.
+    Abstract base class for a threaded asynchronous engine using its own event loop.
 
-    This class provides a structured lifecycle for a service that runs an asyncio event loop
+    This class provides a structured lifecycle for a engine that runs an asyncio event loop
     in a separate thread. Subclasses must implement the `preprocess`, `process`, and
     `postprocess` asynchronous methods to define their behavior.
 
     Attributes:
-        name (str): The name of the service.
+        name (str): The name of the engine.
         thread_id (Optional[int]): Native ID of the thread running the event loop.
         thread_name (str): Name of the thread running the event loop.
-        new_loop (asyncio.AbstractEventLoop): The asyncio event loop for this service.
+        new_loop (asyncio.AbstractEventLoop): The asyncio event loop for this engine.
         thread (Optional[threading.Thread]): The thread in which the event loop runs.
     """
 
@@ -30,7 +30,7 @@ class Service(ABC):
 
     def __init__(self):
         """
-        Initializes the Service instance by creating a new asyncio event loop
+        Initializes the engine instance by creating a new asyncio event loop
         and setting the thread placeholder to None.
         """
         self.new_loop = asyncio.new_event_loop()
@@ -38,7 +38,7 @@ class Service(ABC):
 
     async def start(self):
         """
-        Starts the service by running the `preprocess()` coroutine, launching a new thread
+        Starts the engine by running the `preprocess()` coroutine, launching a new thread
         to host the event loop, and scheduling the `process()` coroutine within that loop.
         """
         await self.preprocess()
@@ -59,13 +59,13 @@ class Service(ABC):
         asyncio.set_event_loop(self.new_loop)
         self.new_loop.run_forever()
         LOGGER.info(
-            f"Event loop of service {self.name} in thread {self.thread_id} stopped"
+            f"Event loop of engine {self.name} in thread {self.thread_id} stopped"
         )
 
     @abstractmethod
     async def preprocess(self):
         """
-        Coroutine for performing setup tasks before the main service logic begins.
+        Coroutine for performing setup tasks before the main engine logic begins.
 
         Must be implemented by subclasses.
         """
@@ -74,10 +74,10 @@ class Service(ABC):
     @abstractmethod
     async def process(self):
         """
-        Coroutine that contains the main logic of the service.
+        Coroutine that contains the main logic of the engine.
 
-        This is the task that runs in the service's event loop and should
-        keep the service alive as long as it's active.
+        This is the task that runs in the engine's event loop and should
+        keep the engine alive as long as it's active.
 
         Must be implemented by subclasses.
         """
@@ -86,7 +86,7 @@ class Service(ABC):
     @abstractmethod
     async def postprocess(self):
         """
-        Coroutine for performing cleanup tasks after the service is stopped.
+        Coroutine for performing cleanup tasks after the engine is stopped.
 
         Must be implemented by subclasses.
         """
@@ -94,10 +94,10 @@ class Service(ABC):
 
     async def stop(self):
         """
-        Stops the service gracefully.
+        Stops the engine gracefully.
 
         Calls the `postprocess()` coroutine, schedules the event loop to stop,
-        and joins the service thread to ensure a clean shutdown.
+        and joins the engine thread to ensure a clean shutdown.
         """
         if self.thread:
             await self.postprocess()
