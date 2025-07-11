@@ -3,7 +3,7 @@ import pytest
 from fifi import GetLogger
 from faker import Faker
 
-from src import PortfolioSchema
+from src.common.portfolio_schema import PortfolioSchema
 
 
 fake = Faker()
