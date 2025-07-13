@@ -4,7 +4,7 @@ from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .repository.simulator_base_repository import SimulatorBaseRepository
+from .simulator_base_repository import SimulatorBaseRepository
 from ..models.position import Position
 from ..enums.position_side import PositionSide
 from ..enums.market import Market
@@ -12,6 +12,15 @@ from ..enums.position_status import PositionStatus
 
 
 class PositionRepository(SimulatorBaseRepository):
+    """
+    Repository for managing Position entities in the simulator context.
+
+    Inherits from:
+        SimulatorBaseRepository: A base repository class customized for simulator-related models.
+
+    This repository provides database access methods specific to the Position model.
+    """
+
     def __init__(self):
         super().__init__(model=Position)
 
@@ -24,6 +33,22 @@ class PositionRepository(SimulatorBaseRepository):
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Position]:
+        """
+        Retrieve all Position records filtered by optional status, side, and market parameters.
+
+        Args:
+            status (Optional[PositionStatus]): Filter positions by their status (e.g., OPEN, CLOSED).
+            side (Optional[PositionSide]): Filter positions by their side (e.g., LONG, SHORT).
+            market (Optional[Market]): Filter positions by market.
+            with_for_update (bool, optional): If True, locks selected rows for update. Defaults to False.
+            session (Optional[AsyncSession]): SQLAlchemy asynchronous session. If not provided, an exception is raised.
+
+        Returns:
+            List[Position]: A list of Position objects matching the specified filters.
+
+        Raises:
+            NotExistedSessionException: If the session is not provided.
+        """
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model)
