@@ -21,6 +21,8 @@ class Balance(DatetimeDecoratedBase):
     frozen: Mapped[float] = mapped_column(
         CheckConstraint("frozen >= 0", name="ck_value_positive"), nullable=False
     )
+    leverage: Mapped[float] = mapped_column(nullable=True)
+
     # relationships
     portfolio: Mapped["Portfolio"] = relationship(
         "Portfolio", back_populates="balances"
