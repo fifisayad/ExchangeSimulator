@@ -12,3 +12,6 @@ class Portfolio(DatetimeDecoratedBase):
     balances: Mapped[List["Balance"]] = relationship(
         "Balance", back_populates="portfolio"
     )
+    positions: Mapped[List["Position"]] = relationship(
+        "Position", back_populates="portfolio"
+    )
