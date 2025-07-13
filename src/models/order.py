@@ -2,6 +2,7 @@ from fifi import DatetimeDecoratedBase
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from ..enums.market import Market
 from ..enums.order_side import OrderSide
 from ..enums.order_type import OrderType
 from ..enums.order_status import OrderStatus
@@ -13,7 +14,7 @@ class Order(DatetimeDecoratedBase):
     portfolio_id: Mapped[str] = mapped_column(
         ForeignKey("portfolios.id"), nullable=False
     )
-    market: Mapped[str] = mapped_column(nullable=False)
+    market: Mapped[Market] = mapped_column(nullable=False)
     fee: Mapped[float] = mapped_column(nullable=False)
     price: Mapped[float] = mapped_column(nullable=False)
     size: Mapped[float] = mapped_column(nullable=False)
