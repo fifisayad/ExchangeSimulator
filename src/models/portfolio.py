@@ -22,10 +22,10 @@ class Portfolio(DatetimeDecoratedBase):
         default=Setting().DEFAULT_PERP_TAKER_FEE, nullable=False
     )
     # relationships
-    orders: Mapped[List["Order"]] = relationship("Order", back_populates="portfolio")
-    balances: Mapped[List["Balance"]] = relationship(
+    orders: Mapped[List["Order"]] = relationship("Order", back_populates="portfolio")  # type: ignore
+    balances: Mapped[List["Balance"]] = relationship(  # type: ignore
         "Balance", back_populates="portfolio"
     )
-    positions: Mapped[List["Position"]] = relationship(
+    positions: Mapped[List["Position"]] = relationship(  # type: ignore
         "Position", back_populates="portfolio"
     )
