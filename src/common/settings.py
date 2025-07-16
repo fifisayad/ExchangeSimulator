@@ -10,9 +10,14 @@ class Setting(BaseSettings):
         load_dotenv()
         super().__init__()
 
-    active_markets: Annotated[list[Market], NoDecode]
+    ACTIVE_MARKETS: Annotated[list[Market], NoDecode]
 
-    @field_validator("active_markets", mode="before")
+    @field_validator("ACTIVE_MARKETS", mode="before")
     @classmethod
     def decode_active_markets(cls, v: str) -> list[Market]:
         return [Market[x] for x in v.split(",")]
+
+    DEFAULT_SPOT_MAKER_FEE: float
+    DEFAULT_SPOT_TAKER_FEE: float
+    DEFAULT_PERP_MAKER_FEE: float
+    DEFAULT_PERP_TAKER_FEE: float

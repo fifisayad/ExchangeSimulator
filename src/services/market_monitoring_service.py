@@ -16,7 +16,7 @@ class MarketMonitoringService:
         self.start()
 
     def start(self):
-        for market in Setting().active_markets:
+        for market in Setting().ACTIVE_MARKETS:
             # TODO: implement monitoring connection flow
             pass
 
