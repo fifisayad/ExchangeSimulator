@@ -6,3 +6,8 @@ class Market(Enum):
     ETHUSD = "ethusd"
     BTCUSD_PERP = "btcusd_perp"
     ETHUSD_PERP = "ethusd_perp"
+
+    def is_perptual(self) -> bool:
+        if "perp" in self.value:
+            return True
+        return False
