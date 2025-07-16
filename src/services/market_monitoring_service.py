@@ -20,7 +20,7 @@ class MarketMonitoringService:
             # TODO: implement monitoring connection flow
             pass
 
-    def get_last_trade(self, market: Optional[Market]) -> Dict[Any, Any]:
+    def get_last_trade(self, market: Optional[Market] = None) -> Dict[Any, Any]:
         """ """
         if market:
             return self.trades[market]
