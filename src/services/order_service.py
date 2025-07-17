@@ -37,4 +37,4 @@ class OrderService:
                         order.fee = order.size * order.portfolio.spot_taker_fee
                     else:
                         order.fee = order_total * order.portfolio.spot_taker_fee
-        # TODO:implement merge functionality for changes on the db models
+            await self.order_repo.update_entity(entity=order)
