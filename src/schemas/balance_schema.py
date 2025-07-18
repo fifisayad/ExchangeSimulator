@@ -9,3 +9,4 @@ class BalanceSchema(BaseModel):
     quantity: float
     available: float
     frozen: float
+    leverage: float
