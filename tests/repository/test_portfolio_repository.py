@@ -14,8 +14,6 @@ class TestPortfolioRepository:
     balance_repo = BalanceRepository()
 
     async def test_get_by_name(self, database_provider_test, portfolio_factory):
-        LOGGER.info(database_provider_test)
-        LOGGER.info(f"decorated base meta data: {DecoratedBase.metadata.tables}")
         portfolios_schema = [portfolio_factory() for i in range(5)]
         portfolios = await self.portfilio_repo.create_many(
             data=portfolios_schema, return_models=True
@@ -26,8 +24,6 @@ class TestPortfolioRepository:
         assert third_portfolio.id == portfolios[3].id
 
     async def test_remove_by_name(self, database_provider_test, portfolio_factory):
-        LOGGER.info(database_provider_test)
-        LOGGER.info(f"decorated base meta data: {DecoratedBase.metadata.tables}")
         portfolios_schema = [portfolio_factory() for i in range(5)]
         portfolios = await self.portfilio_repo.create_many(
             data=portfolios_schema, return_models=True
