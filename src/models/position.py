@@ -21,7 +21,7 @@ class Position(DatetimeDecoratedBase):
     size: Mapped[float] = mapped_column(nullable=False)
     margin: Mapped[float] = mapped_column(nullable=False)
     status: Mapped[PositionStatus] = mapped_column(
-        default=PositionStatus.OPENED, nullable=False
+        default=PositionStatus.OPEN, nullable=False
     )
     side: Mapped[PositionSide] = mapped_column(nullable=False)
 
