@@ -1,8 +1,12 @@
 from typing import Dict, List
 
+from src.enums.order_side import OrderSide
+from src.enums.position_side import PositionSide
+
 from ..enums.position_status import PositionStatus
 from ..models import Order, Position
 from ..repository import PositionRepository
+from ..schemas import PositionSchema
 
 
 class PositionService:
@@ -25,7 +29,13 @@ class PositionService:
         pass
 
     async def create_position_by_order(self, order: Order) -> Position:
-        pass
+        position = PositionSchema()
+        if order.side == OrderSide.BUY:
+            position.side = PositionSide.LONG
+        else:
+            position.side = PositionSide.SHORT
+        # TODO:add logic for opening new position
+        return await self.position_repo.create(position)
 
     async def liquid_position(self, position: Position) -> None:
         pass
