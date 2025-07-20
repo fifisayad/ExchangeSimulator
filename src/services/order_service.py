@@ -1,4 +1,5 @@
-from typing import List, Union
+from datetime import datetime
+from typing import List, Optional, Union
 
 from src.enums.order_side import OrderSide
 from src.enums.order_type import OrderType
@@ -14,6 +15,11 @@ class OrderService:
 
     async def get_open_orders(self) -> List[Order]:
         return await self.order_repo.get_all_order(status=OrderStatus.ACTIVE)
+
+    async def get_filled_perp_orders(self, from_update_time: Optional[datetime] = None):
+        return await self.order_repo.get_filled_perp_orders(
+            from_update_time=from_update_time
+        )
 
     async def fee_calc(self, orders: Union[Order, List[Order]]) -> None:
         orders_list: List[Order] = (

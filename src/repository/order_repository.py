@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import List, Optional
 from fifi import db_async_session
 from fifi.exceptions import NotExistedSessionException
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .simulator_base_repository import SimulatorBaseRepository
@@ -49,6 +50,27 @@ class OrderRepository(SimulatorBaseRepository):
         stmt = select(self.model)
         if status:
             stmt = stmt.where(Order.status == status)
+
+        if with_for_update:
+            stmt = stmt.with_for_update()
+
+        results = await session.execute(stmt)
+        return list(results.scalars().all())
+
+    @db_async_session
+    async def get_filled_perp_orders(
+        self,
+        from_update_time: Optional[datetime],
+        with_for_update: bool = False,
+        session: Optional[AsyncSession] = None,
+    ) -> List[Order]:
+        if not session:
+            raise NotExistedSessionException("session is not existed")
+        stmt = select(self.model).where(
+            and_(Order.status == OrderStatus.FILLED, Order.market.ilike("%perp%"))
+        )
+        if from_update_time:
+            stmt = stmt.where(Order.updated_at >= from_update_time)
 
         if with_for_update:
             stmt = stmt.with_for_update()
