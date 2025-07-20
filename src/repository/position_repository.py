@@ -27,9 +27,9 @@ class PositionRepository(SimulatorBaseRepository):
     @db_async_session
     async def get_all_positions(
         self,
-        status: Optional[PositionStatus],
-        side: Optional[PositionSide],
-        market: Optional[Market],
+        status: Optional[PositionStatus] = None,
+        side: Optional[PositionSide] = None,
+        market: Optional[Market] = None,
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Position]:
