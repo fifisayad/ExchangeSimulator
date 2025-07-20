@@ -64,6 +64,24 @@ class OrderRepository(SimulatorBaseRepository):
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Order]:
+        """
+        Retrieve all filled perpetual orders, optionally filtered by update time
+        and locked for update.
+
+        Args:
+            from_update_time (Optional[datetime]): If provided, only orders updated
+                at or after this timestamp will be returned.
+            with_for_update (bool): If True, applies a SELECT ... FOR UPDATE lock
+                to the query, useful in transactional workflows. Defaults to False.
+            session (Optional[AsyncSession]): The SQLAlchemy async session. If not
+                provided, a session is expected to be injected by the @db_async_session decorator.
+
+        Returns:
+            List[Order]: A list of orders with status FILLED and market containing "perp".
+
+        Raises:
+            NotExistedSessionException: If the session is not available.
+        """
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model).where(
