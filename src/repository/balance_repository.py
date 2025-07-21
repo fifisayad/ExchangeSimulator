@@ -55,16 +55,16 @@ class BalanceRepository(SimulatorBaseRepository):
         return list(results.scalars().all())
 
     @db_async_session
-    async def get_portfolio_asset_leverage(
+    async def get_portfolio_asset(
         self,
         portfolio_id: str,
         asset: Asset,
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
-    ) -> Optional[float]:
+    ) -> Optional[Balance]:
         if not session:
             raise NotExistedSessionException("session is not existed")
-        stmt = select(self.model.leverage).where(
+        stmt = select(self.model).where(
             and_(Balance.portfolio_id == portfolio_id, Balance.asset == asset)
         )
 
@@ -72,4 +72,4 @@ class BalanceRepository(SimulatorBaseRepository):
             stmt = stmt.with_for_update()
 
         result = await session.execute(stmt)
-        return result.scalar()
+        return result.unique().scalar_one_or_none()

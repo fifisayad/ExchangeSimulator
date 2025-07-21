@@ -1,5 +1,5 @@
 from typing import Optional
-from src.enums.asset import Asset
+from ..enums.asset import Asset
 from ..models import Order
 from ..repository import BalanceRepository
 
@@ -15,6 +15,26 @@ class BalanceService:
     async def get_portfolio_asset_leverage(
         self, portfolio_id: str, asset: Asset
     ) -> Optional[float]:
-        return await self.balance_repo.get_portfolio_asset_leverage(
+        asset_balance = await self.balance_repo.get_portfolio_asset(
             portfolio_id=portfolio_id, asset=asset
         )
+        if asset_balance:
+            return asset_balance.leverage
+
+    async def burn_balance(
+        self, portfolio_id: str, asset: Asset, burn_qty: float
+    ) -> bool:
+        asset_balance = await self.balance_repo.get_portfolio_asset(
+            portfolio_id=portfolio_id, asset=asset
+        )
+        if asset_balance:
+            asset_balance.frozen -= burn_qty
+            asset_balance.quantity -= burn_qty
+            if asset_balance.quantity > 0 and asset_balance.frozen >= 0:
+                await self.balance_repo.update_entity(asset_balance)
+                return True
+            else:
+                raise ValueError(
+                    f"{self.__class__.__name__}: burning asset is not possible... asset model is {asset_balance.to_dict()}"
+                )
+        return False
