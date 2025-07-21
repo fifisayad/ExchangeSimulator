@@ -1,3 +1,4 @@
+from src.models.position import Position
 from ..enums.order_side import OrderSide
 from ..enums.position_side import PositionSide
 from ..models import Order
@@ -25,3 +26,21 @@ class PositionHelpers:
     @staticmethod
     def margin_calc(size: float, leverage: float, price: float) -> float:
         return (size / leverage) * price
+
+    @staticmethod
+    def is_order_against_position(order: Order, position: Position) -> bool:
+        if order.market != position.market:
+            raise ValueError(
+                f"""[PositionHelper-is_order_against_position]: order market {order.market} is 
+                not equal with position market {position.market}"""
+            )
+        if order.side == OrderSide.BUY:
+            if position.side == PositionSide.SHORT:
+                return True
+            else:
+                return False
+        else:
+            if position.side == PositionSide.LONG:
+                return True
+            else:
+                return False
