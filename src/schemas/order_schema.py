@@ -12,7 +12,6 @@ class OrderSchema(BaseModel):
     fee: float
     price: float
     size: float
-    leverage: int = 1
     status: OrderStatus = OrderStatus.ACTIVE
     side: OrderSide = OrderSide.BUY
     type: OrderType = OrderType.LIMIT
