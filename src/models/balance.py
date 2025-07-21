@@ -21,6 +21,11 @@ class Balance(DatetimeDecoratedBase):
     frozen: Mapped[float] = mapped_column(
         CheckConstraint("frozen >= 0", name="ck_value_positive"), nullable=False
     )
+    burned: Mapped[float] = mapped_column(
+        CheckConstraint("frozen >= 0", name="ck_value_positive"),
+        default=0,
+        nullable=False,
+    )
     leverage: Mapped[float] = mapped_column(default=0, nullable=True)
 
     # relationships
