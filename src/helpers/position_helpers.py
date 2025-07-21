@@ -11,3 +11,13 @@ class PositionHelpers:
             return PositionSide.LONG
         else:
             return PositionSide.SHORT
+
+    @staticmethod
+    def lqd_price_calc(
+        entry_price: float, leverage: float, side: PositionSide
+    ) -> float:
+        lqd_distance = entry_price / leverage
+        if side == PositionSide.LONG:
+            return entry_price - lqd_distance
+        else:
+            return entry_price + lqd_distance
