@@ -60,7 +60,7 @@ class OrderRepository(SimulatorBaseRepository):
     @db_async_session
     async def get_filled_perp_orders(
         self,
-        from_update_time: Optional[datetime],
+        from_update_time: Optional[datetime] = None,
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Order]:
