@@ -16,8 +16,9 @@ class Position(DatetimeDecoratedBase):
     market: Mapped[Market] = mapped_column(nullable=False)
     leverage: Mapped[float] = mapped_column(nullable=False)
     entry_price: Mapped[float] = mapped_column(nullable=False)
+    close_price: Mapped[float] = mapped_column(default=0, nullable=False)
     lqd_price: Mapped[float] = mapped_column(nullable=False)
-    pnl: Mapped[float] = mapped_column(nullable=False)
+    pnl: Mapped[float] = mapped_column(default=0, nullable=False)
     size: Mapped[float] = mapped_column(nullable=False)
     margin: Mapped[float] = mapped_column(nullable=False)
     status: Mapped[PositionStatus] = mapped_column(
