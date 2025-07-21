@@ -1,5 +1,6 @@
 import pytest
 
+from src.models.order import Order
 from src.repository import PortfolioRepository
 from src.repository import BalanceRepository
 from src.repository import OrderRepository
@@ -47,3 +48,23 @@ class TestOrderRepository:
 
         for order in got_orders:
             assert order.id in active_orders_id_set
+
+    async def test_get_filled_perp_orders(self, database_provider_test, order_factory):
+        order_schemas: List[OrderSchema] = order_factory(count=1000)
+        orders: List[Order] = await self.order_repo.create_many(
+            data=order_schemas, return_models=True
+        )
+        filled_perp_orders_id_set = set()
+        for order in orders:
+            if order.status == OrderStatus.FILLED and order.market.is_perptual():
+                filled_perp_orders_id_set.add(order.id)
+
+        LOGGER.info(
+            f"[{self.__class__.__name__}]: filled perp orders count: {len(filled_perp_orders_id_set)}"
+        )
+        got_orders = await self.order_repo.get_filled_perp_orders()
+
+        assert len(got_orders) == len(filled_perp_orders_id_set)
+
+        for order in got_orders:
+            assert order.id in filled_perp_orders_id_set
