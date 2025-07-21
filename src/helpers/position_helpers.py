@@ -1,7 +1,6 @@
-from src.models.position import Position
 from ..enums.order_side import OrderSide
 from ..enums.position_side import PositionSide
-from ..models import Order
+from ..models import Order, Position
 
 
 class PositionHelpers:
@@ -44,3 +43,12 @@ class PositionHelpers:
                 return True
             else:
                 return False
+
+    @staticmethod
+    def pnl_value(position: Position, price: float, size: float) -> float:
+        if position.side == PositionSide.LONG:
+            price_delta = price - position.entry_price
+        else:
+            price_delta = position.entry_price - price
+
+        return size * (price_delta / price_delta)
