@@ -9,8 +9,11 @@ from src.enums.asset import Asset
 from src.enums.market import Market
 from src.enums.order_side import OrderSide
 from src.enums.order_status import OrderStatus
+from src.enums.position_side import PositionSide
+from src.enums.position_status import PositionStatus
 from src.schemas import PortfolioSchema, BalanceSchema, OrderSchema
 from src.common.settings import Setting
+from src.schemas.position_schema import PositionSchema
 
 
 fake = Faker()
@@ -70,3 +73,28 @@ def order_factory():
         return order_schemas
 
     return create_orders
+
+
+@pytest.fixture
+def position_factory():
+    def create_positions(
+        portfolio_id: str = "iamrich", count: int = 5
+    ) -> List[PositionSchema]:
+        position_schemas = list()
+        leverages = [1, 2, 3, 4, 5]
+        for i in range(count):
+            position_schemas.append(
+                PositionSchema(
+                    portfolio_id=portfolio_id,
+                    side=fake.enum(PositionSide),
+                    entry_price=random.random(),
+                    status=fake.enum(PositionStatus),
+                    margin=random.random(),
+                    size=random.random(),
+                    leverage=random.choice(leverages),
+                    lqd_price=random.random(),
+                )
+            )
+        return position_schemas
+
+    return create_positions
