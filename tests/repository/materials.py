@@ -8,6 +8,7 @@ from faker import Faker
 from src.enums.asset import Asset
 from src.enums.market import Market
 from src.enums.order_side import OrderSide
+from src.enums.order_status import OrderStatus
 from src.schemas import PortfolioSchema, BalanceSchema, OrderSchema
 from src.common.settings import Setting
 
@@ -63,6 +64,7 @@ def order_factory():
                     size=random.random(),
                     fee=random.random(),
                     side=fake.enum(OrderSide),
+                    status=fake.enum(OrderStatus),
                 )
             )
         return order_schemas
