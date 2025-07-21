@@ -62,6 +62,27 @@ class BalanceRepository(SimulatorBaseRepository):
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> Optional[Balance]:
+        """
+        Retrieve a specific asset balance from a portfolio.
+
+        This asynchronous method queries the database for a `Balance` entry that matches
+        the given `portfolio_id` and `asset`. Optionally, the query can be locked for
+        update to prevent concurrent modifications.
+
+        Args:
+            portfolio_id (str): The ID of the portfolio to search within.
+            asset (Asset): The asset to retrieve the balance for.
+            with_for_update (bool, optional): If True, adds a "FOR UPDATE" clause to
+                the SQL statement to lock the selected row. Defaults to False.
+            session (Optional[AsyncSession], optional): An optional SQLAlchemy async
+                session. If not provided, an exception will be raised.
+
+        Returns:
+            Optional[Balance]: The `Balance` object if found, otherwise `None`.
+
+        Raises:
+            NotExistedSessionException: If no session is provided.
+        """
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model).where(
