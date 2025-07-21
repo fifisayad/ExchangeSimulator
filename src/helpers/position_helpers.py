@@ -21,3 +21,7 @@ class PositionHelpers:
             return entry_price - lqd_distance
         else:
             return entry_price + lqd_distance
+
+    @staticmethod
+    def margin_calc(size: float, leverage: float, price: float) -> float:
+        return (size / leverage) * price
