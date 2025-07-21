@@ -23,6 +23,7 @@ class Order(DatetimeDecoratedBase):
     )
     type: Mapped[OrderType] = mapped_column(default=OrderType.LIMIT, nullable=False)
     side: Mapped[OrderSide] = mapped_column(nullable=False)
+    positon_id: Mapped[str] = mapped_column(nullable=True)
 
     # relationships
     portfolio: Mapped["Portfolio"] = relationship("Portfolio", back_populates="orders")
