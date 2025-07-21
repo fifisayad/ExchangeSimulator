@@ -67,3 +67,25 @@ class TestpositionRepository:
 
         for position in got_positions:
             assert position.id in long_positions_id_set
+
+    async def test_get_all_positions_with_side(
+        self, database_provider_test, position_factory
+    ):
+        positions_schemas: List[PositionSchema] = position_factory(count=100)
+        positions: List[Position] = await self.position_repo.create_many(
+            data=positions_schemas, return_models=True
+        )
+
+        btc_perp_positions_id_set = set()
+        for position in positions:
+            if position.market == Market.BTCUSD_PERP:
+                btc_perp_positions_id_set.add(position.id)
+
+        LOGGER.info(f"BTCUSD_PERP positions counts: {len(btc_perp_positions_id_set)}")
+
+        got_positions = await self.position_repo.get_all_positions(
+            market=Market.BTCUSD_PERP
+        )
+
+        for position in got_positions:
+            assert position.id in btc_perp_positions_id_set
