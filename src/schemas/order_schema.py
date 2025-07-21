@@ -3,11 +3,12 @@ from pydantic import BaseModel
 from ..enums.order_status import OrderStatus
 from ..enums.order_side import OrderSide
 from ..enums.order_type import OrderType
+from ..enums.market import Market
 
 
 class OrderSchema(BaseModel):
     portfolio_id: str
-    market: str
+    market: Market
     fee: float
     price: float
     size: float
