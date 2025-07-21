@@ -45,3 +45,12 @@ class BalanceService:
             await self.balance_repo.update_entity(asset_balance)
             return True
         return False
+
+    async def add_balance(self, portfolio_id: str, asset: Asset, qty: float) -> bool:
+        asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
+        if asset_balance:
+            asset_balance.quantity += qty
+            asset_balance.available += qty
+            await self.balance_repo.update_entity(asset_balance)
+            return True
+        return False
