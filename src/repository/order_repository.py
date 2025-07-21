@@ -27,7 +27,7 @@ class OrderRepository(SimulatorBaseRepository):
     @db_async_session
     async def get_all_order(
         self,
-        status: Optional[OrderStatus],
+        status: Optional[OrderStatus] = None,
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Order]:
