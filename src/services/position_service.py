@@ -9,6 +9,7 @@ from ..helpers.position_helpers import PositionHelpers
 from .balance_service import BalanceService
 
 
+# TODO: adding position id for orders
 class PositionService:
 
     def __init__(self) -> None:
@@ -27,7 +28,59 @@ class PositionService:
         return positions
 
     async def apply_order_to_position(self, order: Order, position: Position) -> None:
+        if PositionHelpers.is_order_against_position(order, position):
+            if order.size >= position.size:
+                await self.close_position(order, position)
+            else:
+                await self.close_partially_position(order, position)
+        else:
+            await self.merge_order_with_position(order, position)
+
+    async def merge_order_with_position(self, order: Order, position: Position) -> None:
         pass
+
+    async def close_partially_position(self, order: Order, position: Position) -> None:
+        position.close_price = order.price
+        position.pnl += PositionHelpers.pnl_value(
+            position=position, price=order.price, size=order.price * order.size
+        )
+
+        # unlock margin
+        is_unlocked = await self.balance_service.unlock_balance(
+            portfolio_id=position.portfolio_id,
+            asset=Asset.USD,
+            unlocked_qty=position.entry_price * order.size,
+        )
+        position.margin -= position.entry_price * order.size
+        position.size -= order.size
+
+        # add pnl value
+        is_realized = await self.balance_service.add_balance(
+            portfolio_id=position.portfolio_id, asset=Asset.USD, qty=position.pnl
+        )
+        if is_unlocked & is_realized:
+            await self.position_repo.update_entity(position)
+
+    async def close_position(self, order: Order, position: Position) -> None:
+        position.close_price = order.price
+        position.pnl += PositionHelpers.pnl_value(
+            position=position, price=order.price, size=order.price * order.size
+        )
+        position.status = PositionStatus.CLOSE
+
+        # unlock margin
+        is_unlocked = await self.balance_service.unlock_balance(
+            portfolio_id=position.portfolio_id,
+            asset=Asset.USD,
+            unlocked_qty=position.margin,
+        )
+
+        # add pnl value
+        is_realized = await self.balance_service.add_balance(
+            portfolio_id=position.portfolio_id, asset=Asset.USD, qty=position.pnl
+        )
+        if is_unlocked & is_realized:
+            await self.position_repo.update_entity(position)
 
     async def create_position_by_order(self, order: Order) -> Position:
         position = PositionSchema()
