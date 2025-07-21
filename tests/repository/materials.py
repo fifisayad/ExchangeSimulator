@@ -85,6 +85,7 @@ def position_factory():
         for i in range(count):
             position_schemas.append(
                 PositionSchema(
+                    market=fake.enum(Market),
                     portfolio_id=portfolio_id,
                     side=fake.enum(PositionSide),
                     entry_price=random.random(),
