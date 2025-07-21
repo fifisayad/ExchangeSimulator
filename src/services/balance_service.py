@@ -31,11 +31,17 @@ class BalanceService:
             asset_balance.frozen -= burned_qty
             asset_balance.quantity -= burned_qty
             asset_balance.burned = burned_qty
-            if asset_balance.quantity > 0 and asset_balance.frozen >= 0:
-                await self.balance_repo.update_entity(asset_balance)
-                return True
-            else:
-                raise ValueError(
-                    f"{self.__class__.__name__}: burning asset is not possible... asset model is {asset_balance.to_dict()}"
-                )
+            await self.balance_repo.update_entity(asset_balance)
+            return True
+        return False
+
+    async def unlock_balance(
+        self, portfolio_id: str, asset: Asset, unlocked_qty: float
+    ) -> bool:
+        asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
+        if asset_balance:
+            asset_balance.frozen -= unlocked_qty
+            asset_balance.available += unlocked_qty
+            await self.balance_repo.update_entity(asset_balance)
+            return True
         return False
