@@ -1,8 +1,6 @@
 from typing import Dict, List
 
-from src.enums.order_side import OrderSide
-from src.enums.position_side import PositionSide
-
+from ..enums.asset import Asset
 from ..enums.position_status import PositionStatus
 from ..models import Order, Position
 from ..repository import PositionRepository
@@ -56,4 +54,12 @@ class PositionService:
         return await self.position_repo.create(position)
 
     async def liquid_position(self, position: Position) -> None:
-        pass
+        is_sucessful = self.balance_service.burn_balance(
+            portfolio_id=position.portfolio_id,
+            asset=Asset.USD,
+            burned_qty=position.margin,
+        )
+        if is_sucessful:
+            position.pnl = (-1) * position.margin
+            position.status = PositionStatus.LIQUID
+            await self.position_repo.update_entity(position)
