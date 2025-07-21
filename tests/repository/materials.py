@@ -6,11 +6,14 @@ from fifi import GetLogger
 from faker import Faker
 
 from src.enums.asset import Asset
-from src.schemas import PortfolioSchema
-from src.schemas import BalanceSchema
+from src.enums.market import Market
+from src.enums.order_side import OrderSide
+from src.schemas import PortfolioSchema, BalanceSchema, OrderSchema
+from src.common.settings import Setting
 
 
 fake = Faker()
+setting = Setting()
 LOGGER = GetLogger().get()
 
 
@@ -43,3 +46,25 @@ def balance_factory_for_portfolios():
         return balances
 
     return create_balance
+
+
+@pytest.fixture
+def order_factory():
+    def create_orders(
+        portfolio_id: str = "iamrich", count: int = 5
+    ) -> List[OrderSchema]:
+        order_schemas = list()
+        for i in range(count):
+            order_schemas.append(
+                OrderSchema(
+                    portfolio_id=portfolio_id,
+                    market=fake.enum(Market),
+                    price=random.random(),
+                    size=random.random(),
+                    fee=random.random(),
+                    side=fake.enum(OrderSide),
+                )
+            )
+        return order_schemas
+
+    return create_orders
