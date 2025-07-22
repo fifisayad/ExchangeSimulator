@@ -99,30 +99,32 @@ class PositionService:
             await self.order_service.set_position_id(order, position.id)
 
     async def create_position_by_order(self, order: Order) -> Position:
-        position = PositionSchema()
-        position.entry_price = order.price
-        position.portfolio_id = order.portfolio_id
-        position.market = order.market
-        position.size = order.size
-        position.side = PositionHelpers.get_position_side_with_order(order)
+        position_schema = PositionSchema()
+        position_schema.entry_price = order.price
+        position_schema.portfolio_id = order.portfolio_id
+        position_schema.market = order.market
+        position_schema.size = order.size
+        position_schema.side = PositionHelpers.get_position_side_with_order(order)
         leverage = await self.balance_service.get_portfolio_asset_leverage(
-            portfolio_id=position.portfolio_id,
+            portfolio_id=position_schema.portfolio_id,
             asset=order.market.get_payment_asset_enum(order.side),
         )
         if leverage:
-            position.leverage = leverage
+            position_schema.leverage = leverage
         else:
             # just in impossible case ;)
-            position.leverage = 1
-        position.lqd_price = PositionHelpers.lqd_price_calc(
-            entry_price=order.price, leverage=position.leverage, side=position.side
+            position_schema.leverage = 1
+        position_schema.lqd_price = PositionHelpers.lqd_price_calc(
+            entry_price=order.price,
+            leverage=position_schema.leverage,
+            side=position_schema.side,
         )
-        position.margin = PositionHelpers.margin_calc(
-            position.size, position.leverage, position.entry_price
+        position_schema.margin = PositionHelpers.margin_calc(
+            position_schema.size, position_schema.leverage, position_schema.entry_price
         )
-        new_position = await self.position_repo.create(position)
-        await self.order_service.set_position_id(order, new_position.id)
-        return new_position
+        position = await self.position_repo.create(position_schema)
+        await self.order_service.set_position_id(order, position.id)
+        return position
 
     async def liquid_position(self, position: Position) -> None:
         is_sucessful = await self.balance_service.burn_balance(
