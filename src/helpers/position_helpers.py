@@ -86,13 +86,13 @@ class PositionHelpers:
                 return False
 
     @staticmethod
-    def pnl_value(position: Position, price: float, size: float) -> float:
+    def pnl_value(position: Position, price: float, notional_value: float) -> float:
         """Calculates the profit or loss (PnL) value for a given position.
 
         Args:
             position (Position): The trading position.
             price (float): The current price.
-            size (float): The size of the position.
+            notional_value (float): The notional_value of the position.
 
         Returns:
             float: The calculated PnL value.
@@ -102,7 +102,7 @@ class PositionHelpers:
         else:
             price_delta = position.entry_price - price
 
-        return size * (price_delta / position.entry_price)
+        return notional_value * (price_delta / position.entry_price)
 
     @staticmethod
     def weighted_average_entry_price(position: Position, order: Order) -> float:
