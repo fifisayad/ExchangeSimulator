@@ -37,7 +37,19 @@ class PositionService:
             await self.merge_order_with_position(order, position)
 
     async def merge_order_with_position(self, order: Order, position: Position) -> None:
-        pass
+        position.entry_price = PositionHelpers.weighted_average_entry_price(
+            position=position, order=order
+        )
+        position.lqd_price = PositionHelpers.lqd_price_calc(
+            entry_price=position.entry_price,
+            leverage=position.leverage,
+            side=position.side,
+        )
+        position.size += order.size
+        position.margin = PositionHelpers.margin_calc(
+            size=position.size, leverage=position.leverage, price=position.entry_price
+        )
+        await self.position_repo.update_entity(position)
 
     async def close_partially_position(self, order: Order, position: Position) -> None:
         position.close_price = order.price
