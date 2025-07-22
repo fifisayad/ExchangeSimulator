@@ -21,3 +21,7 @@ class Setting(BaseSettings):
     DEFAULT_SPOT_TAKER_FEE: float
     DEFAULT_PERP_MAKER_FEE: float
     DEFAULT_PERP_TAKER_FEE: float
+
+    # API Endpoints Settings
+    API_PREFIX: str = "exapi"
+    API_VERSION: str = "v0.0.1"
