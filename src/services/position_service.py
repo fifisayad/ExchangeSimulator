@@ -7,14 +7,15 @@ from ..repository import PositionRepository
 from ..schemas import PositionSchema
 from ..helpers.position_helpers import PositionHelpers
 from .balance_service import BalanceService
+from .order_service import OrderService
 
 
-# TODO: adding position id for orders
 class PositionService:
 
     def __init__(self) -> None:
         self.position_repo = PositionRepository()
         self.balance_service = BalanceService()
+        self.order_service = OrderService()
 
     async def get_open_positions(self) -> List[Position]:
         return await self.position_repo.get_all_positions(status=PositionStatus.OPEN)
@@ -50,6 +51,7 @@ class PositionService:
             size=position.size, leverage=position.leverage, price=position.entry_price
         )
         await self.position_repo.update_entity(position)
+        await self.order_service.set_position_id(order, position.id)
 
     async def close_partially_position(self, order: Order, position: Position) -> None:
         position.close_price = order.price
@@ -72,6 +74,7 @@ class PositionService:
         )
         if is_unlocked & is_realized:
             await self.position_repo.update_entity(position)
+            await self.order_service.set_position_id(order, position.id)
 
     async def close_position(self, order: Order, position: Position) -> None:
         position.close_price = order.price
@@ -93,6 +96,7 @@ class PositionService:
         )
         if is_unlocked & is_realized:
             await self.position_repo.update_entity(position)
+            await self.order_service.set_position_id(order, position.id)
 
     async def create_position_by_order(self, order: Order) -> Position:
         position = PositionSchema()
@@ -116,7 +120,9 @@ class PositionService:
         position.margin = PositionHelpers.margin_calc(
             position.size, position.leverage, position.entry_price
         )
-        return await self.position_repo.create(position)
+        new_position = await self.position_repo.create(position)
+        await self.order_service.set_position_id(order, new_position.id)
+        return new_position
 
     async def liquid_position(self, position: Position) -> None:
         is_sucessful = self.balance_service.burn_balance(
