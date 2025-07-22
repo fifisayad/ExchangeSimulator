@@ -109,11 +109,7 @@ class PositionService:
             portfolio_id=position_schema.portfolio_id,
             asset=order.market.get_payment_asset_enum(order.side),
         )
-        if leverage:
-            position_schema.leverage = leverage
-        else:
-            # just in impossible case ;)
-            position_schema.leverage = 1
+        position_schema.leverage = leverage or 1
         position_schema.lqd_price = PositionHelpers.lqd_price_calc(
             entry_price=order.price,
             leverage=position_schema.leverage,
