@@ -125,7 +125,7 @@ class PositionService:
         return new_position
 
     async def liquid_position(self, position: Position) -> None:
-        is_sucessful = self.balance_service.burn_balance(
+        is_sucessful = await self.balance_service.burn_balance(
             portfolio_id=position.portfolio_id,
             asset=Asset.USD,
             burned_qty=position.margin,
