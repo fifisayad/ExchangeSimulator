@@ -72,7 +72,7 @@ class PositionService:
         is_realized = await self.balance_service.add_balance(
             portfolio_id=position.portfolio_id, asset=Asset.USD, qty=position.pnl
         )
-        if is_unlocked & is_realized:
+        if is_unlocked and is_realized:
             await self.position_repo.update_entity(position)
             await self.order_service.set_position_id(order, position.id)
 
