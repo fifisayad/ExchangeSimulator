@@ -16,7 +16,9 @@ class OrderService:
     async def get_open_orders(self) -> List[Order]:
         return await self.order_repo.get_all_order(status=OrderStatus.ACTIVE)
 
-    async def get_filled_perp_orders(self, from_update_time: Optional[datetime] = None):
+    async def get_filled_perp_orders(
+        self, from_update_time: Optional[datetime] = None
+    ) -> List[Order]:
         return await self.order_repo.get_filled_perp_orders(
             from_update_time=from_update_time
         )
