@@ -51,7 +51,7 @@ class PositionHelpers:
         else:
             price_delta = position.entry_price - price
 
-        return size * (price_delta / price_delta)
+        return size * (price_delta / position.entry_price)
 
     @staticmethod
     def weighted_average_entry_price(position: Position, order: Order) -> float:
