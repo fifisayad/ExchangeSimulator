@@ -1,4 +1,5 @@
 from typing import Dict, List
+from fifi import GetLogger
 
 from ..enums.asset import Asset
 from ..enums.position_status import PositionStatus
@@ -8,6 +9,9 @@ from ..schemas import PositionSchema
 from ..helpers.position_helpers import PositionHelpers
 from .balance_service import BalanceService
 from .order_service import OrderService
+
+
+LOGGER = GetLogger().get()
 
 
 class PositionService:
@@ -38,6 +42,9 @@ class PositionService:
             await self.merge_order_with_position(order, position)
 
     async def merge_order_with_position(self, order: Order, position: Position) -> None:
+        LOGGER.info(
+            f"merging order with id: {order.id} into position with id: {position.id}"
+        )
         position.entry_price = PositionHelpers.weighted_average_entry_price(
             position=position, order=order
         )
@@ -50,10 +57,16 @@ class PositionService:
         position.margin = PositionHelpers.margin_calc(
             size=position.size, leverage=position.leverage, price=position.entry_price
         )
+        LOGGER.debug(
+            f"order:{order.to_dict()} is merged with position: {position.to_dict()}"
+        )
         await self.position_repo.update_entity(position)
         await self.order_service.set_position_id(order, position.id)
 
     async def close_partially_position(self, order: Order, position: Position) -> None:
+        LOGGER.info(
+            f"closing partially position with id: {position.id} by order with id: {order.id}"
+        )
         position.close_price = order.price
         position.pnl += PositionHelpers.pnl_value(
             position=position,
@@ -75,10 +88,16 @@ class PositionService:
             portfolio_id=position.portfolio_id, asset=Asset.USD, qty=position.pnl
         )
         if is_unlocked and is_realized:
+            LOGGER.debug(
+                f"closing partially position: {position.to_dict()} by order: {order.to_dict()}"
+            )
             await self.position_repo.update_entity(position)
             await self.order_service.set_position_id(order, position.id)
 
     async def close_position(self, order: Order, position: Position) -> None:
+        LOGGER.info(
+            f"closing position with id: {position.id} by order with id: {order.id}"
+        )
         position.close_price = order.price
         position.pnl += PositionHelpers.pnl_value(
             position=position,
@@ -99,10 +118,14 @@ class PositionService:
             portfolio_id=position.portfolio_id, asset=Asset.USD, qty=position.pnl
         )
         if is_unlocked & is_realized:
+            LOGGER.debug(
+                f"closing partially position: {position.to_dict()} by order: {order.to_dict()}"
+            )
             await self.position_repo.update_entity(position)
             await self.order_service.set_position_id(order, position.id)
 
     async def create_position_by_order(self, order: Order) -> Position:
+        LOGGER.info(f"creating new position by order with id: {order.id}")
         position_schema = PositionSchema()
         position_schema.entry_price = order.price
         position_schema.portfolio_id = order.portfolio_id
@@ -123,10 +146,17 @@ class PositionService:
             position_schema.size, position_schema.leverage, position_schema.entry_price
         )
         position = await self.position_repo.create(position_schema)
+        LOGGER.info(
+            f"created new position by id:{position.id} by order with id: {order.id}"
+        )
+        LOGGER.debug(
+            f"created new position:{position.to_dict()} by order:{order.to_dict()}"
+        )
         await self.order_service.set_position_id(order, position.id)
         return position
 
     async def liquid_position(self, position: Position) -> None:
+        LOGGER.info(f"liquiding a position by id:{position.id}")
         is_sucessful = await self.balance_service.burn_balance(
             portfolio_id=position.portfolio_id,
             asset=Asset.USD,
