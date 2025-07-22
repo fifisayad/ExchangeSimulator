@@ -1,7 +1,11 @@
 from typing import Optional
+
+from fifi import GetLogger
 from ..enums.asset import Asset
 from ..models import Order
 from ..repository import BalanceRepository
+
+LOGGER = GetLogger().get()
 
 
 class BalanceService:
@@ -33,6 +37,7 @@ class BalanceService:
             asset_balance.burned += burned_qty
             await self.balance_repo.update_entity(asset_balance)
             return True
+        LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
 
     async def unlock_balance(
@@ -44,6 +49,7 @@ class BalanceService:
             asset_balance.available += unlocked_qty
             await self.balance_repo.update_entity(asset_balance)
             return True
+        LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
 
     async def add_balance(self, portfolio_id: str, asset: Asset, qty: float) -> bool:
@@ -55,4 +61,5 @@ class BalanceService:
             asset_balance.available += qty
             await self.balance_repo.update_entity(asset_balance)
             return True
+        LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
