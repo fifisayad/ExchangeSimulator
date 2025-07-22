@@ -30,7 +30,7 @@ class BalanceService:
         if asset_balance:
             asset_balance.frozen -= burned_qty
             asset_balance.quantity -= burned_qty
-            asset_balance.burned = burned_qty
+            asset_balance.burned += burned_qty
             await self.balance_repo.update_entity(asset_balance)
             return True
         return False
