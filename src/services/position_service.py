@@ -15,16 +15,32 @@ LOGGER = GetLogger().get()
 
 
 class PositionService:
+    """Service class responsible for managing trading positions, including creation,
+    merging, partial and full closure, and liquidation. It coordinates with repositories
+    and other services to persist changes and manage balance updates."""
 
     def __init__(self) -> None:
+        """Initializes the PositionService with repository and dependent services."""
+
         self.position_repo = PositionRepository()
         self.balance_service = BalanceService()
         self.order_service = OrderService()
 
     async def get_open_positions(self) -> List[Position]:
+        """Fetches all currently open trading positions.
+
+        Returns:
+            List[Position]: A list of open positions.
+        """
         return await self.position_repo.get_all_positions(status=PositionStatus.OPEN)
 
     async def get_open_positions_hashmap(self) -> Dict[str, Position]:
+        """Returns a hashmap of open positions keyed by market and portfolio ID.
+
+        Returns:
+            Dict[str, Position]: A dictionary of open positions with keys in the format
+            "{market}_{portfolio_id}".
+        """
         open_positions = await self.get_open_positions()
         positions = dict()
         # unique hash for this is {market}_{portfolio_id}
@@ -33,6 +49,12 @@ class PositionService:
         return positions
 
     async def apply_order_to_position(self, order: Order, position: Position) -> None:
+        """Applies an order to an existing position, either merging or closing it.
+
+        Args:
+            order (Order): The incoming order.
+            position (Position): The existing position.
+        """
         if PositionHelpers.is_order_against_position(order, position):
             if order.size >= position.size:
                 await self.close_position(order, position)
@@ -42,6 +64,12 @@ class PositionService:
             await self.merge_order_with_position(order, position)
 
     async def merge_order_with_position(self, order: Order, position: Position) -> None:
+        """Merges an order into an existing position, updating price, size, and margin.
+
+        Args:
+            order (Order): The incoming order.
+            position (Position): The position to update.
+        """
         LOGGER.info(
             f"merging order with id: {order.id} into position with id: {position.id}"
         )
@@ -64,6 +92,12 @@ class PositionService:
         await self.order_service.set_position_id(order, position.id)
 
     async def close_partially_position(self, order: Order, position: Position) -> None:
+        """Closes a position partially based on the order size.
+
+        Args:
+            order (Order): The closing order.
+            position (Position): The position to update.
+        """
         LOGGER.info(
             f"closing partially position with id: {position.id} by order with id: {order.id}"
         )
@@ -95,6 +129,12 @@ class PositionService:
             await self.order_service.set_position_id(order, position.id)
 
     async def close_position(self, order: Order, position: Position) -> None:
+        """Fully closes a position based on the order.
+
+        Args:
+            order (Order): The closing order.
+            position (Position): The position to close.
+        """
         LOGGER.info(
             f"closing position with id: {position.id} by order with id: {order.id}"
         )
@@ -125,6 +165,14 @@ class PositionService:
             await self.order_service.set_position_id(order, position.id)
 
     async def create_position_by_order(self, order: Order) -> Position:
+        """Creates a new trading position from a given order.
+
+        Args:
+            order (Order): The initiating order.
+
+        Returns:
+            Position: The newly created position.
+        """
         LOGGER.info(f"creating new position by order with id: {order.id}")
         position_schema = PositionSchema()
         position_schema.entry_price = order.price
@@ -156,6 +204,11 @@ class PositionService:
         return position
 
     async def liquid_position(self, position: Position) -> None:
+        """Liquidates a position due to margin requirements and updates balance accordingly.
+
+        Args:
+            position (Position): The position to liquidate.
+        """
         LOGGER.info(f"liquiding a position by id:{position.id}")
         is_sucessful = await self.balance_service.burn_balance(
             portfolio_id=position.portfolio_id,
