@@ -4,7 +4,7 @@ import pytest
 from src.repository import PortfolioRepository
 from src.repository import BalanceRepository
 from src.repository import OrderRepository
-from tests.repository.materials import *
+from tests.materials import *
 
 
 @pytest.mark.asyncio

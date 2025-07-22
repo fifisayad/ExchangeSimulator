@@ -2,7 +2,7 @@ import pytest
 
 from src.models import Position
 from src.repository import PositionRepository
-from tests.repository.materials import *
+from tests.materials import *
 
 
 @pytest.mark.asyncio
