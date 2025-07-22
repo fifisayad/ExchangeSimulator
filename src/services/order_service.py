@@ -22,7 +22,7 @@ class OrderService:
         )
 
     async def set_position_id(self, order: Order, position_id: str) -> None:
-        order.positon_id = position_id
+        order.position_id = position_id
         await self.order_repo.update_entity(order)
 
     async def fee_calc(self, orders: Union[Order, List[Order]]) -> None:
