@@ -9,8 +9,12 @@ LOGGER = GetLogger().get()
 
 
 class BalanceService:
+    """Service responsible for managing portfolio asset balances,
+    including leverage retrieval, balance unlocking, burning, and updates
+    related to trading activity."""
 
     def __init__(self):
+        """Initializes the BalanceService with its associated repository."""
         self.balance_repo = BalanceRepository()
 
     async def update_balances(self, order: Order) -> None:
@@ -19,6 +23,15 @@ class BalanceService:
     async def get_portfolio_asset_leverage(
         self, portfolio_id: str, asset: Asset
     ) -> Optional[float]:
+        """Retrieves the leverage associated with a specific asset in a portfolio.
+
+        Args:
+            portfolio_id (str): The ID of the portfolio.
+            asset (Asset): The asset to retrieve leverage for.
+
+        Returns:
+            Optional[float]: The leverage value if found, otherwise None.
+        """
         asset_balance = await self.balance_repo.get_portfolio_asset(
             portfolio_id=portfolio_id, asset=asset
         )
@@ -28,6 +41,16 @@ class BalanceService:
     async def burn_balance(
         self, portfolio_id: str, asset: Asset, burned_qty: float
     ) -> bool:
+        """Burns (reduces) balance and frozen funds from a portfolio asset, simulating a loss.
+
+        Args:
+            portfolio_id (str): The ID of the portfolio.
+            asset (Asset): The asset to deduct balance from.
+            burned_qty (float): The amount to burn.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
         asset_balance = await self.balance_repo.get_portfolio_asset(
             portfolio_id=portfolio_id, asset=asset
         )
@@ -43,6 +66,16 @@ class BalanceService:
     async def unlock_balance(
         self, portfolio_id: str, asset: Asset, unlocked_qty: float
     ) -> bool:
+        """Unlocks frozen balance and makes it available for use.
+
+        Args:
+            portfolio_id (str): The ID of the portfolio.
+            asset (Asset): The asset to modify.
+            unlocked_qty (float): The amount to unlock.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
         asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.frozen -= unlocked_qty
@@ -53,6 +86,16 @@ class BalanceService:
         return False
 
     async def add_balance(self, portfolio_id: str, asset: Asset, qty: float) -> bool:
+        """Adds balance to a portfolio asset, typically as realized PnL.
+
+        Args:
+            portfolio_id (str): The ID of the portfolio.
+            asset (Asset): The asset to add to.
+            qty (float): The amount to add.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
         if qty <= 0:
             raise ValueError("Quantity must be positive.")
         asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
