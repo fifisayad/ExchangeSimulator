@@ -26,9 +26,7 @@ class OrderService:
         await self.order_repo.update_entity(order)
 
     async def fee_calc(self, orders: Union[Order, List[Order]]) -> None:
-        orders_list: List[Order] = (
-            [orders] if type(orders) == Order else orders
-        )  # type: ignore
+        orders_list = [orders] if isinstance(orders, Order) else orders
         for order in orders_list:
             order_total = order.size * order.price
             if order.market.is_perptual():
