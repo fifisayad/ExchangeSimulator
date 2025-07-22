@@ -47,6 +47,8 @@ class BalanceService:
         return False
 
     async def add_balance(self, portfolio_id: str, asset: Asset, qty: float) -> bool:
+        if qty <= 0:
+            raise ValueError("Quantity must be positive.")
         asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.quantity += qty
