@@ -1,4 +1,3 @@
-from fifi import DecoratedBase
 import pytest
 
 from src.repository import PortfolioRepository
