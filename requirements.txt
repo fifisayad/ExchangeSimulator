@@ -1,5 +1,5 @@
 dotenv==0.9.9
-fificore==0.0.4
+fificore==0.0.8
 greenlet==3.2.2
 python-dotenv==1.1.0
 redis==6.2.0
