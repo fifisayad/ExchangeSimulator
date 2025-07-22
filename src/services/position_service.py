@@ -56,7 +56,9 @@ class PositionService:
     async def close_partially_position(self, order: Order, position: Position) -> None:
         position.close_price = order.price
         position.pnl += PositionHelpers.pnl_value(
-            position=position, price=order.price, size=order.price * order.size
+            position=position,
+            price=order.price,
+            notional_value=order.price * order.size,
         )
 
         # unlock margin
@@ -79,7 +81,9 @@ class PositionService:
     async def close_position(self, order: Order, position: Position) -> None:
         position.close_price = order.price
         position.pnl += PositionHelpers.pnl_value(
-            position=position, price=order.price, size=order.price * order.size
+            position=position,
+            price=order.price,
+            notional_value=order.price * order.size,
         )
         position.status = PositionStatus.CLOSE
 
