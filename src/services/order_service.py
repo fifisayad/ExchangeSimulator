@@ -21,6 +21,10 @@ class OrderService:
             from_update_time=from_update_time
         )
 
+    async def set_position_id(self, order: Order, position_id: str) -> None:
+        order.positon_id = position_id
+        await self.order_repo.update_entity(order)
+
     async def fee_calc(self, orders: Union[Order, List[Order]]) -> None:
         orders_list: List[Order] = (
             [orders] if type(orders) == Order else orders
