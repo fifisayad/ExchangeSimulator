@@ -16,9 +16,7 @@ class TestOrderRepository:
 
     async def test_get_all_orders(self, database_provider_test, order_factory):
         order_schemas: List[OrderSchema] = order_factory()
-        orders = await self.order_repo.create_many(
-            data=order_schemas, return_models=True
-        )
+        orders = await self.order_repo.create_many(data=order_schemas)
         orders_id_set = set()
         for order in orders:
             orders_id_set.add(order.id)
@@ -32,9 +30,7 @@ class TestOrderRepository:
         self, database_provider_test, order_factory
     ):
         order_schemas: List[OrderSchema] = order_factory(count=100)
-        orders = await self.order_repo.create_many(
-            data=order_schemas, return_models=True
-        )
+        orders = await self.order_repo.create_many(data=order_schemas)
         active_orders_id_set = set()
         for order in orders:
             if order.status == OrderStatus.ACTIVE:
@@ -50,9 +46,7 @@ class TestOrderRepository:
 
     async def test_get_filled_perp_orders(self, database_provider_test, order_factory):
         order_schemas: List[OrderSchema] = order_factory(count=1000)
-        orders: List[Order] = await self.order_repo.create_many(
-            data=order_schemas, return_models=True
-        )
+        orders: List[Order] = await self.order_repo.create_many(data=order_schemas)
         filled_perp_orders_id_set = set()
         for order in orders:
             if order.status == OrderStatus.FILLED and order.market.is_perptual():
@@ -70,9 +64,7 @@ class TestOrderRepository:
         self, database_provider_test, order_factory
     ):
         order_schemas: List[OrderSchema] = order_factory(count=1000)
-        orders: List[Order] = await self.order_repo.create_many(
-            data=order_schemas, return_models=True
-        )
+        orders: List[Order] = await self.order_repo.create_many(data=order_schemas)
         filled_perp_orders_id_set = set()
         update_time = GetCurrentTime().get()
         for order in orders:

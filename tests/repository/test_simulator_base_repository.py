@@ -23,7 +23,6 @@ class TestSimulatorBaseRepository:
 
         positions: List[Position] = await self.position_repo.create_many(
             data=tehran_positions_schemas + newyork_positions_schemas,
-            return_models=True,
         )
 
         newyork_positions = await self.position_repo.get_entities_by_portfolio_id(
@@ -41,7 +40,6 @@ class TestSimulatorBaseRepository:
 
         positions: List[Position] = await self.position_repo.create_many(
             data=tehran_positions_schemas,
-            return_models=True,
         )
 
         newyork_positions = await self.position_repo.get_entities_by_portfolio_id(

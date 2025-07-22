@@ -11,9 +11,7 @@ class TestpositionRepository:
 
     async def test_get_all_positions(self, database_provider_test, position_factory):
         positions_schemas: List[PositionSchema] = position_factory()
-        positions = await self.position_repo.create_many(
-            data=positions_schemas, return_models=True
-        )
+        positions = await self.position_repo.create_many(data=positions_schemas)
 
         positions_id_set = set()
         for position in positions:
@@ -29,7 +27,7 @@ class TestpositionRepository:
     ):
         positions_schemas: List[PositionSchema] = position_factory(count=100)
         positions: List[Position] = await self.position_repo.create_many(
-            data=positions_schemas, return_models=True
+            data=positions_schemas
         )
 
         active_positions_id_set = set()
@@ -51,7 +49,7 @@ class TestpositionRepository:
     ):
         positions_schemas: List[PositionSchema] = position_factory(count=100)
         positions: List[Position] = await self.position_repo.create_many(
-            data=positions_schemas, return_models=True
+            data=positions_schemas
         )
 
         long_positions_id_set = set()
@@ -73,7 +71,7 @@ class TestpositionRepository:
     ):
         positions_schemas: List[PositionSchema] = position_factory(count=100)
         positions: List[Position] = await self.position_repo.create_many(
-            data=positions_schemas, return_models=True
+            data=positions_schemas
         )
 
         btc_perp_positions_id_set = set()
@@ -95,7 +93,7 @@ class TestpositionRepository:
     ):
         positions_schemas: List[PositionSchema] = position_factory(count=500)
         positions: List[Position] = await self.position_repo.create_many(
-            data=positions_schemas, return_models=True
+            data=positions_schemas
         )
 
         positions_id_set = set()

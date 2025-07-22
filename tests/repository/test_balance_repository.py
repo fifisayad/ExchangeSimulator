@@ -17,14 +17,12 @@ class TestBalanceRepository:
         self, database_provider_test, portfolio_factory, balance_factory_for_portfolios
     ):
         portfolios_schema = [portfolio_factory() for i in range(5)]
-        portfolios = await self.portfilio_repo.create_many(
-            data=portfolios_schema, return_models=True
-        )
+        portfolios = await self.portfilio_repo.create_many(data=portfolios_schema)
 
         for portfolio in portfolios:  # type: ignore
             balances_schema = balance_factory_for_portfolios(portfolio.id)
-            is_created = await self.balance_repo.create_many(data=balances_schema)
-            assert is_created == True
+            balances_created = await self.balance_repo.create_many(data=balances_schema)
+            assert len(balances_schema) == len(balances_created)
 
         balances = await self.balance_repo.get_all_balances()
 
@@ -37,9 +35,7 @@ class TestBalanceRepository:
         portfolio = await self.portfilio_repo.create(data=portfolio_schema)
 
         balances_schema = balance_factory_for_portfolios(portfolio.id)
-        balances = await self.balance_repo.create_many(
-            data=balances_schema, return_models=True
-        )
+        balances = await self.balance_repo.create_many(data=balances_schema)
 
         for balance in balances:
             got_balance = await self.balance_repo.get_portfolio_asset(
