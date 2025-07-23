@@ -40,9 +40,7 @@ class BalanceService(Service):
         Returns:
             Optional[float]: The leverage value if found, otherwise None.
         """
-        asset_balance = await self.repo.get_portfolio_asset(
-            portfolio_id=portfolio_id, asset=asset
-        )
+        asset_balance = await self.read_by_asset(portfolio_id=portfolio_id, asset=asset)
         if asset_balance:
             return asset_balance.leverage
 
@@ -59,9 +57,7 @@ class BalanceService(Service):
         Returns:
             bool: True if the operation was successful, False otherwise.
         """
-        asset_balance = await self.repo.get_portfolio_asset(
-            portfolio_id=portfolio_id, asset=asset
-        )
+        asset_balance = await self.read_by_asset(portfolio_id=portfolio_id, asset=asset)
         if asset_balance:
             asset_balance.frozen -= burned_qty
             asset_balance.quantity -= burned_qty
@@ -84,7 +80,7 @@ class BalanceService(Service):
         Returns:
             bool: True if the operation was successful, False otherwise.
         """
-        asset_balance = await self.repo.get_portfolio_asset(portfolio_id, asset)
+        asset_balance = await self.read_by_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.frozen -= unlocked_qty
             asset_balance.available += unlocked_qty
@@ -106,7 +102,7 @@ class BalanceService(Service):
         """
         if qty <= 0:
             raise ValueError("Quantity must be positive.")
-        asset_balance = await self.repo.get_portfolio_asset(portfolio_id, asset)
+        asset_balance = await self.read_by_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.quantity += qty
             asset_balance.available += qty
