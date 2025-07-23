@@ -10,3 +10,22 @@ class BalanceSchema(BaseModel):
     available: float
     frozen: float
     leverage: float
+
+
+class BalanceReadSchema(BaseModel):
+    portfolio_id: str
+    id: str | None = None
+    asset: Asset | None = None
+
+
+class BalanceResponseSchema(BaseModel):
+    id: str
+    portfolio_id: str
+    asset: Asset
+    quantity: float
+    available: float
+    frozen: float
+    leverage: float
+
+    class Config:
+        orm_mode = True
