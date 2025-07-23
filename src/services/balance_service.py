@@ -134,4 +134,11 @@ class BalanceService(Service):
         LOGGER.info(
             f"creating new balance for {portfolio_id=}, {asset.value=} with {qty=}"
         )
-        return await self.repo.create(data=balance_schema)
+        return await self.create(data=balance_schema)
+
+    async def update_leverage(
+        self,
+        portfolio_id: str,
+        asset: Asset,
+    ) -> Balance:
+        pass
