@@ -130,4 +130,8 @@ class BalanceService(Service):
             available=qty,
             frozen=0,
         )
+
+        LOGGER.info(
+            f"creating new balance for {portfolio_id=}, {asset.value=} with {qty=}"
+        )
         return await self.repo.create(data=balance_schema)
