@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from .deps import get_portfolio_service
 from ...services import PortfolioService
-from ...schemas import PortfolioSchema
+from ...schemas.portfolio_schema import PortfolioResponseSchema
 
 
 @asynccontextmanager
@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
 router = APIRouter(prefix="/portfolio", tags=["Portfolio"], lifespan=lifespan)
 
 
-@router.get("", response_model=PortfolioSchema)
+@router.get("", response_model=PortfolioResponseSchema)
 async def get_portfolio(
     id: str | None = None,
     name: str | None = None,
