@@ -44,7 +44,6 @@ def balance_factory_for_portfolios():
                     quantity=quantity,
                     available=available,
                     frozen=quantity - available,
-                    leverage=random.choice(portion),
                 )
             )
         return balances
