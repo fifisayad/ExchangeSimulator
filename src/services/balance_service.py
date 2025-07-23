@@ -3,6 +3,7 @@ from typing import List, Optional
 from fifi import GetLogger
 
 from src.models.balance import Balance
+from src.schemas.balance_schema import BalanceSchema
 
 from .service import Service
 from ..enums.asset import Asset
@@ -118,3 +119,15 @@ class BalanceService(Service):
         return await self.repo.get_portfolio_asset(
             portfolio_id=portfolio_id, asset=asset
         )
+
+    async def create_by_qty(
+        self, portfolio_id: str, asset: Asset, qty: float
+    ) -> Balance:
+        balance_schema = BalanceSchema(
+            portfolio_id=portfolio_id,
+            asset=asset,
+            quantity=qty,
+            available=qty,
+            frozen=0,
+        )
+        return await self.repo.create(data=balance_schema)
