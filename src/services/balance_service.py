@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import List, Optional
 
 from fifi import GetLogger
+
+from src.models.balance import Balance
 
 from .service import Service
 from ..enums.asset import Asset
@@ -112,3 +114,6 @@ class BalanceService(Service):
             return True
         LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
+
+    async def read_many_by_portfolio_id(self, portfolio_id: str) -> List[Balance]:
+        return await self.repo.get_entities_by_portfolio_id(portfolio_id=portfolio_id)
