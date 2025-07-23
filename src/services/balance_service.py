@@ -117,3 +117,8 @@ class BalanceService(Service):
 
     async def read_many_by_portfolio_id(self, portfolio_id: str) -> List[Balance]:
         return await self.repo.get_entities_by_portfolio_id(portfolio_id=portfolio_id)
+
+    async def read_by_asset(self, portfolio_id: str, asset: Asset) -> Optional[Balance]:
+        return await self.repo.get_portfolio_asset(
+            portfolio_id=portfolio_id, asset=asset
+        )
