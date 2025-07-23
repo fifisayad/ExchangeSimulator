@@ -1,10 +1,12 @@
 from typing import Annotated
 from dotenv import load_dotenv
+from fifi import singleton
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode
 from ..enums.market import Market
 
 
+@singleton
 class Setting(BaseSettings):
     def __init__(self):
         load_dotenv()
@@ -24,4 +26,4 @@ class Setting(BaseSettings):
 
     # API Endpoints Settings
     API_PREFIX: str = "exapi"
-    API_VERSION: str = "v0.0.1"
+    API_VERSION: str = "v1"
