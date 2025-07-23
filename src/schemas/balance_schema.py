@@ -23,6 +23,12 @@ class BalanceDepositSchema(BaseModel):
     quantity: float
 
 
+class BalanceLeverageSchema(BaseModel):
+    portfolio_id: str
+    asset: Asset
+    leverage: float
+
+
 class BalanceResponseSchema(BaseModel):
     id: str
     portfolio_id: str
