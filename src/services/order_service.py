@@ -1,22 +1,26 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from src.enums.order_side import OrderSide
-from src.enums.order_type import OrderType
-
+from ..enums.order_side import OrderSide
+from ..enums.order_type import OrderType
+from .service import Service
 from ..enums.order_status import OrderStatus
 from ..repository import OrderRepository
 from ..models import Order
 
 
-class OrderService:
+class OrderService(Service):
     """Service class responsible for managing and processing orders,
     including retrieving active/filled orders, calculating fees, and
     associating orders with positions."""
 
     def __init__(self):
         """Initializes the OrderService with its order repository."""
-        self.order_repo = OrderRepository()
+        self._repo = OrderRepository()
+
+    @property
+    def repo(self) -> OrderRepository:
+        return self._repo
 
     async def get_open_orders(self) -> List[Order]:
         """Retrieves all currently active (open) orders.
@@ -24,7 +28,7 @@ class OrderService:
         Returns:
             List[Order]: A list of active orders.
         """
-        return await self.order_repo.get_all_order(status=OrderStatus.ACTIVE)
+        return await self.repo.get_all_order(status=OrderStatus.ACTIVE)
 
     async def get_filled_perp_orders(
         self, from_update_time: Optional[datetime] = None
@@ -37,9 +41,7 @@ class OrderService:
         Returns:
             List[Order]: A list of filled perpetual orders.
         """
-        return await self.order_repo.get_filled_perp_orders(
-            from_update_time=from_update_time
-        )
+        return await self.repo.get_filled_perp_orders(from_update_time=from_update_time)
 
     async def set_position_id(self, order: Order, position_id: str) -> None:
         """Associates a given order with a trading position.
@@ -49,7 +51,7 @@ class OrderService:
             position_id (str): The ID of the associated position.
         """
         order.position_id = position_id
-        await self.order_repo.update_entity(order)
+        await self.repo.update_entity(order)
 
     async def fee_calc(self, orders: Union[Order, List[Order]]) -> None:
         """Calculates and applies trading fees to one or more orders based on
@@ -77,4 +79,4 @@ class OrderService:
                         order.fee = order.size * order.portfolio.spot_taker_fee
                     else:
                         order.fee = order_total * order.portfolio.spot_taker_fee
-            await self.order_repo.update_entity(entity=order)
+            await self.repo.update_entity(entity=order)

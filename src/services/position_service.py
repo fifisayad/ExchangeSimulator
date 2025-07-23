@@ -7,6 +7,7 @@ from ..models import Order, Position
 from ..repository import PositionRepository
 from ..schemas import PositionSchema
 from ..helpers.position_helpers import PositionHelpers
+from .service import Service
 from .balance_service import BalanceService
 from .order_service import OrderService
 
@@ -14,7 +15,7 @@ from .order_service import OrderService
 LOGGER = GetLogger().get()
 
 
-class PositionService:
+class PositionService(Service):
     """Service class responsible for managing trading positions, including creation,
     merging, partial and full closure, and liquidation. It coordinates with repositories
     and other services to persist changes and manage balance updates."""
@@ -22,9 +23,13 @@ class PositionService:
     def __init__(self) -> None:
         """Initializes the PositionService with repository and dependent services."""
 
-        self.position_repo = PositionRepository()
+        self._repo = PositionRepository()
         self.balance_service = BalanceService()
         self.order_service = OrderService()
+
+    @property
+    def repo(self) -> PositionRepository:
+        return self._repo
 
     async def get_open_positions(self) -> List[Position]:
         """Fetches all currently open trading positions.
@@ -32,7 +37,7 @@ class PositionService:
         Returns:
             List[Position]: A list of open positions.
         """
-        return await self.position_repo.get_all_positions(status=PositionStatus.OPEN)
+        return await self.repo.get_all_positions(status=PositionStatus.OPEN)
 
     async def get_open_positions_hashmap(self) -> Dict[str, Position]:
         """Returns a hashmap of open positions keyed by market and portfolio ID.
@@ -88,7 +93,7 @@ class PositionService:
         LOGGER.debug(
             f"order:{order.to_dict()} is merged with position: {position.to_dict()}"
         )
-        await self.position_repo.update_entity(position)
+        await self.repo.update_entity(position)
         await self.order_service.set_position_id(order, position.id)
 
     async def close_partially_position(self, order: Order, position: Position) -> None:
@@ -125,7 +130,7 @@ class PositionService:
             LOGGER.debug(
                 f"closing partially position: {position.to_dict()} by order: {order.to_dict()}"
             )
-            await self.position_repo.update_entity(position)
+            await self.repo.update_entity(position)
             await self.order_service.set_position_id(order, position.id)
 
     async def close_position(self, order: Order, position: Position) -> None:
@@ -161,7 +166,7 @@ class PositionService:
             LOGGER.debug(
                 f"closing partially position: {position.to_dict()} by order: {order.to_dict()}"
             )
-            await self.position_repo.update_entity(position)
+            await self.repo.update_entity(position)
             await self.order_service.set_position_id(order, position.id)
 
     async def create_position_by_order(self, order: Order) -> Position:
@@ -193,7 +198,7 @@ class PositionService:
         position_schema.margin = PositionHelpers.margin_calc(
             position_schema.size, position_schema.leverage, position_schema.entry_price
         )
-        position = await self.position_repo.create(position_schema)
+        position = await self.repo.create(position_schema)
         LOGGER.info(
             f"created new position by id:{position.id} by order with id: {order.id}"
         )
@@ -218,4 +223,4 @@ class PositionService:
         if is_sucessful:
             position.pnl = (-1) * position.margin
             position.status = PositionStatus.LIQUID
-            await self.position_repo.update_entity(position)
+            await self.repo.update_entity(position)

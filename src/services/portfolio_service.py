@@ -1,2 +1,5 @@
-class PortfolioService:
+from .service import Service
+
+
+class PortfolioService(Service):
     pass

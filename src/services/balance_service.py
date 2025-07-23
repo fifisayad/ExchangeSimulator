@@ -1,6 +1,8 @@
 from typing import Optional
 
 from fifi import GetLogger
+
+from .service import Service
 from ..enums.asset import Asset
 from ..models import Order
 from ..repository import BalanceRepository
@@ -8,14 +10,18 @@ from ..repository import BalanceRepository
 LOGGER = GetLogger().get()
 
 
-class BalanceService:
+class BalanceService(Service):
     """Service responsible for managing portfolio asset balances,
     including leverage retrieval, balance unlocking, burning, and updates
     related to trading activity."""
 
     def __init__(self):
         """Initializes the BalanceService with its associated repository."""
-        self.balance_repo = BalanceRepository()
+        self._repo = BalanceRepository()
+
+    @property
+    def repo(self) -> BalanceRepository:
+        return self._repo
 
     async def update_balances(self, order: Order) -> None:
         pass
@@ -32,7 +38,7 @@ class BalanceService:
         Returns:
             Optional[float]: The leverage value if found, otherwise None.
         """
-        asset_balance = await self.balance_repo.get_portfolio_asset(
+        asset_balance = await self.repo.get_portfolio_asset(
             portfolio_id=portfolio_id, asset=asset
         )
         if asset_balance:
@@ -51,14 +57,14 @@ class BalanceService:
         Returns:
             bool: True if the operation was successful, False otherwise.
         """
-        asset_balance = await self.balance_repo.get_portfolio_asset(
+        asset_balance = await self.repo.get_portfolio_asset(
             portfolio_id=portfolio_id, asset=asset
         )
         if asset_balance:
             asset_balance.frozen -= burned_qty
             asset_balance.quantity -= burned_qty
             asset_balance.burned += burned_qty
-            await self.balance_repo.update_entity(asset_balance)
+            await self.repo.update_entity(asset_balance)
             return True
         LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
@@ -76,11 +82,11 @@ class BalanceService:
         Returns:
             bool: True if the operation was successful, False otherwise.
         """
-        asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
+        asset_balance = await self.repo.get_portfolio_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.frozen -= unlocked_qty
             asset_balance.available += unlocked_qty
-            await self.balance_repo.update_entity(asset_balance)
+            await self.repo.update_entity(asset_balance)
             return True
         LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
@@ -98,11 +104,11 @@ class BalanceService:
         """
         if qty <= 0:
             raise ValueError("Quantity must be positive.")
-        asset_balance = await self.balance_repo.get_portfolio_asset(portfolio_id, asset)
+        asset_balance = await self.repo.get_portfolio_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.quantity += qty
             asset_balance.available += qty
-            await self.balance_repo.update_entity(asset_balance)
+            await self.repo.update_entity(asset_balance)
             return True
         LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
