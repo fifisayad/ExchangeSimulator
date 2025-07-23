@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from ...schemas.balance_schema import (
     BalanceDepositSchema,
+    BalanceLeverageSchema,
     BalanceReadSchema,
     BalanceResponseSchema,
 )
@@ -71,3 +72,11 @@ async def deposit_balance(
                 status_code=400,
                 detail=f"the portfolio {balance_dposit.portfolio_id=} not existed",
             )
+
+
+@balance_router.patch("/leverage", response_model=BalanceResponseSchema)
+async def update_balance_leverage(
+    balance_leverage: BalanceLeverageSchema,
+    balance_service: BalanceService = Depends(get_balance_service),
+):
+    pass
