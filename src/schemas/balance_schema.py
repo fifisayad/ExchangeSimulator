@@ -18,6 +18,12 @@ class BalanceReadSchema(BaseModel):
     asset: Asset | None = None
 
 
+class BalanceDepositSchema(BaseModel):
+    portfolio_id: str
+    asset: Asset
+    quantity: float
+
+
 class BalanceResponseSchema(BaseModel):
     id: str
     portfolio_id: str
@@ -25,6 +31,7 @@ class BalanceResponseSchema(BaseModel):
     quantity: float
     available: float
     frozen: float
+    burned: float
     leverage: float
 
     class Config:
