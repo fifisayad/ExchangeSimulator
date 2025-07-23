@@ -38,6 +38,3 @@ class BalanceResponseSchema(BaseModel):
     frozen: float
     burned: float
     leverage: float
-
-    class Config:
-        orm_mode = True
