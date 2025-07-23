@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI
 from contextlib import asynccontextmanager
-from .portfolio_router import router as portfolio_router
+from .portfolio_router import portfolio_router
 
 
 @asynccontextmanager

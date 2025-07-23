@@ -16,10 +16,10 @@ async def lifespan(app: FastAPI):
     # cleanup
 
 
-router = APIRouter(prefix="/portfolio", tags=["Portfolio"], lifespan=lifespan)
+portfolio_router = APIRouter(prefix="/portfolio", tags=["Portfolio"], lifespan=lifespan)
 
 
-@router.get("", response_model=PortfolioResponseSchema)
+@portfolio_router.get("", response_model=PortfolioResponseSchema)
 async def get_portfolio(
     id: str | None = None,
     name: str | None = None,
@@ -36,7 +36,7 @@ async def get_portfolio(
     raise HTTPException(status_code=404, detail="portfolio not found")
 
 
-@router.post("", response_model=PortfolioResponseSchema)
+@portfolio_router.post("", response_model=PortfolioResponseSchema)
 async def create_portfolio(
     portfolio: PortfolioSchema,
     portfolio_service: PortfolioService = Depends(get_portfolio_service),
@@ -52,7 +52,7 @@ async def create_portfolio(
         raise HTTPException(status_code=400, detail=str(ex))
 
 
-@router.patch("", response_model=PortfolioResponseSchema)
+@portfolio_router.patch("", response_model=PortfolioResponseSchema)
 async def update_portfolio(
     portfolio: PortfolioSchema,
     portfolio_service: PortfolioService = Depends(get_portfolio_service),
