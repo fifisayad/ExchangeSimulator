@@ -2,8 +2,15 @@ from typing import List, Union
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
-from ...schemas.balance_schema import BalanceReadSchema, BalanceResponseSchema
-from .deps import get_balance_service
+from src.services.portfolio_service import PortfolioService
+
+from ...schemas.balance_schema import (
+    BalanceDepositSchema,
+    BalanceReadSchema,
+    BalanceResponseSchema,
+    BalanceSchema,
+)
+from .deps import get_balance_service, get_portfolio_service
 from ...services import BalanceService
 
 
@@ -38,3 +45,33 @@ async def get_balance(
                     return balance
         return balances
     raise HTTPException(status_code=404, detail="balance not found")
+
+
+@balance_router.post("/deposit", response_model=BalanceResponseSchema)
+async def deposit_balance(
+    balance_dposit: BalanceDepositSchema,
+    balance_service: BalanceService = Depends(get_balance_service),
+    portfolio_service: PortfolioService = Depends(get_portfolio_service),
+):
+    is_successful = await balance_service.add_balance(
+        portfolio_id=balance_dposit.portfolio_id,
+        asset=balance_dposit.asset,
+        qty=balance_dposit.quantity,
+    )
+    if is_successful:
+        return await balance_service.read_by_asset(
+            portfolio_id=balance_dposit.portfolio_id, asset=balance_dposit.asset
+        )
+    else:
+        portfolio = await portfolio_service.read_by_id(id=balance_dposit.portfolio_id)
+        if portfolio:
+            return await balance_service.create_by_qty(
+                portfolio_id=balance_dposit.portfolio_id,
+                asset=balance_dposit.asset,
+                qty=balance_dposit.quantity,
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"the portfolio {balance_dposit.portfolio_id=} not existed",
+            )
