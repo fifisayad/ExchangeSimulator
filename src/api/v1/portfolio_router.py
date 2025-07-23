@@ -3,7 +3,10 @@ from contextlib import asynccontextmanager
 
 from .deps import get_portfolio_service
 from ...services import PortfolioService
-from ...schemas.portfolio_schema import PortfolioResponseSchema, PortfolioSchema
+from ...schemas.portfolio_schema import (
+    PortfolioResponseSchema,
+    PortfolioSchema,
+)
 
 
 @asynccontextmanager
@@ -45,5 +48,18 @@ async def create_portfolio(
                 status_code=400, detail=f"the portfolio {portfolio.name=} is existed"
             )
         return await portfolio_service.create(data=portfolio)
+    except Exception as ex:
+        raise HTTPException(status_code=400, detail=str(ex))
+
+
+@router.patch("", response_model=PortfolioResponseSchema)
+async def update_portfolio(
+    portfolio: PortfolioSchema,
+    portfolio_service: PortfolioService = Depends(get_portfolio_service),
+):
+    try:
+        return await portfolio_service.update_by_name(
+            name=portfolio.name, data=portfolio
+        )
     except Exception as ex:
         raise HTTPException(status_code=400, detail=str(ex))
