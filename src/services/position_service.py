@@ -10,6 +10,7 @@ from ..helpers.position_helpers import PositionHelpers
 from .service import Service
 from .balance_service import BalanceService
 from .order_service import OrderService
+from .leverage_service import LeverageService
 
 
 LOGGER = GetLogger().get()
@@ -26,6 +27,7 @@ class PositionService(Service):
         self._repo = PositionRepository()
         self.balance_service = BalanceService()
         self.order_service = OrderService()
+        self.leverage_service = LeverageService()
 
     @property
     def repo(self) -> PositionRepository:
@@ -185,9 +187,9 @@ class PositionService(Service):
         position_schema.market = order.market
         position_schema.size = order.size
         position_schema.side = PositionHelpers.get_position_side_with_order(order)
-        leverage = await self.balance_service.get_portfolio_asset_leverage(
+        leverage = await self.leverage_service.get_portfolio_market_leverage(
             portfolio_id=position_schema.portfolio_id,
-            asset=order.market.get_payment_asset_enum(order.side),
+            market=order.market,
         )
         position_schema.leverage = leverage or 1
         position_schema.lqd_price = PositionHelpers.lqd_price_calc(

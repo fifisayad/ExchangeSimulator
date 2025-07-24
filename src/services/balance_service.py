@@ -29,22 +29,6 @@ class BalanceService(Service):
     async def update_balances(self, order: Order) -> None:
         pass
 
-    async def get_portfolio_asset_leverage(
-        self, portfolio_id: str, asset: Asset
-    ) -> Optional[float]:
-        """Retrieves the leverage associated with a specific asset in a portfolio.
-
-        Args:
-            portfolio_id (str): The ID of the portfolio.
-            asset (Asset): The asset to retrieve leverage for.
-
-        Returns:
-            Optional[float]: The leverage value if found, otherwise None.
-        """
-        asset_balance = await self.read_by_asset(portfolio_id=portfolio_id, asset=asset)
-        if asset_balance:
-            return asset_balance.leverage
-
     async def burn_balance(
         self, portfolio_id: str, asset: Asset, burned_qty: float
     ) -> bool:
@@ -135,15 +119,3 @@ class BalanceService(Service):
             f"creating new balance for {portfolio_id=}, {asset.value=} with {qty=}"
         )
         return await self.create(data=balance_schema)
-
-    async def update_leverage(
-        self, portfolio_id: str, asset: Asset, leverage: float
-    ) -> Optional[Balance]:
-        balance = await self.read_by_asset(portfolio_id=portfolio_id, asset=asset)
-        if balance:
-            balance.leverage = leverage
-            LOGGER.info(
-                f"updating balance leverage {portfolio_id=} {asset=} {leverage=}"
-            )
-            await self.update_entity(balance)
-        return balance
