@@ -1,4 +1,4 @@
-from ...services import PortfolioService, BalanceService
+from ...services import PortfolioService, BalanceService, OrderService
 
 
 def get_portfolio_service() -> PortfolioService:
@@ -7,3 +7,7 @@ def get_portfolio_service() -> PortfolioService:
 
 def get_balance_service() -> BalanceService:
     return BalanceService()
+
+
+def get_order_service() -> OrderService:
+    return OrderService()
