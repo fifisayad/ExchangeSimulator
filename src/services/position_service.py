@@ -187,7 +187,7 @@ class PositionService(Service):
         position_schema.market = order.market
         position_schema.size = order.size
         position_schema.side = PositionHelpers.get_position_side_with_order(order)
-        leverage = await self.leverage_service.get_portfolio_market_leverage(
+        leverage = await self.leverage_service.get_portfolio_market_leverage_value(
             portfolio_id=position_schema.portfolio_id,
             market=order.market,
         )
