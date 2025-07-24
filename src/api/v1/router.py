@@ -2,6 +2,7 @@ from fastapi import APIRouter, FastAPI
 from contextlib import asynccontextmanager
 from .portfolio_router import portfolio_router
 from .balance_router import balance_router
+from .leverage_router import leverage_router
 
 
 @asynccontextmanager
@@ -16,3 +17,4 @@ router = APIRouter(prefix="/v1", tags=["v1"], lifespan=lifespan)
 
 router.include_router(portfolio_router)
 router.include_router(balance_router)
+router.include_router(leverage_router)
