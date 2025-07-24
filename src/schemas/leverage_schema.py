@@ -7,3 +7,8 @@ class LeverageSchema(BaseModel):
     portfolio_id: str
     market: Market
     leverage: float
+
+
+class LeverageReadSchema(BaseModel):
+    portfolio_id: str
+    market: Market
