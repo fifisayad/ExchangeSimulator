@@ -6,6 +6,7 @@ from .service import Service
 from ..enums.market import Market
 from ..models import Leverage
 from ..repository import LeverageRepository
+from ..schemas import LeverageSchema
 
 LOGGER = GetLogger().get()
 
@@ -34,7 +35,7 @@ class LeverageService(Service):
         if leverage:
             return leverage.leverage
 
-    async def update_leverage(
+    async def create_or_update_leverage(
         self, portfolio_id: str, market: Market, leverage: float
     ) -> Optional[Leverage]:
         leverage_model = await self.repo.get_leverage_by_portfolio_id_and_market(
@@ -44,4 +45,11 @@ class LeverageService(Service):
             leverage_model.leverage = leverage
             LOGGER.info(f"updating {portfolio_id=} {market=} {leverage=}")
             await self.update_entity(leverage_model)
+        else:
+            leverage_schema = LeverageSchema(
+                portfolio_id=portfolio_id, market=market, leverage=leverage
+            )
+            LOGGER.info(f"creating {portfolio_id=} {market=} {leverage=}")
+
+            leverage_model = await self.create(data=leverage_schema)
         return leverage_model
