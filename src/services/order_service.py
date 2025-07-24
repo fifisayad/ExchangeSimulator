@@ -9,6 +9,7 @@ from ..repository import OrderRepository
 from ..models import Order
 
 
+# TODO: REFACTOR get orders with filter and make it flexible
 class OrderService(Service):
     """Service class responsible for managing and processing orders,
     including retrieving active/filled orders, calculating fees, and
