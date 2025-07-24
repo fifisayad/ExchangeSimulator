@@ -74,6 +74,28 @@ class BalanceService(Service):
         LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
         return False
 
+    async def lock_balance(
+        self, portfolio_id: str, asset: Asset, locked_qty: float
+    ) -> bool:
+        """Lock available balance and freeze it.
+
+        Args:
+            portfolio_id (str): The ID of the portfolio.
+            asset (Asset): The asset to modify.
+            locked_qty (float): The amount to lock.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+        asset_balance = await self.read_by_asset(portfolio_id, asset)
+        if asset_balance:
+            asset_balance.frozen += locked_qty
+            asset_balance.available -= locked_qty
+            await self.repo.update_entity(asset_balance)
+            return True
+        LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
+        return False
+
     async def add_balance(self, portfolio_id: str, asset: Asset, qty: float) -> bool:
         """Adds balance to a portfolio asset, typically as realized PnL.
 
