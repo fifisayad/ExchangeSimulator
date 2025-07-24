@@ -26,7 +26,6 @@ class Balance(DatetimeDecoratedBase):
         default=0,
         nullable=False,
     )
-    leverage: Mapped[float] = mapped_column(default=0, nullable=True)
 
     # relationships
     portfolio: Mapped["Portfolio"] = relationship(
