@@ -18,6 +18,13 @@ class LeverageService(Service):
     def repo(self) -> LeverageRepository:
         return self._repo
 
+    async def get_portfolio_market_leverage(
+        self, portfolio_id: str, market: Market
+    ) -> Optional[Leverage]:
+        return await self.repo.get_leverage_by_portfolio_id_and_market(
+            portfolio_id=portfolio_id, market=market
+        )
+
     async def get_portfolio_market_leverage_value(
         self, portfolio_id: str, market: Market
     ) -> Optional[float]:
