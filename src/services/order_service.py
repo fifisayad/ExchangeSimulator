@@ -80,3 +80,6 @@ class OrderService(Service):
                     else:
                         order.fee = order_total * order.portfolio.spot_taker_fee
             await self.repo.update_entity(entity=order)
+
+    async def read_orders_by_portfolio_id(self, portfolio_id: str) -> List[Order]:
+        return await self.repo.get_entities_by_portfolio_id(portfolio_id=portfolio_id)
