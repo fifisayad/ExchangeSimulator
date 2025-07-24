@@ -24,11 +24,11 @@ class Portfolio(DatetimeDecoratedBase):
     # relationships
     orders: Mapped[List["Order"]] = relationship("Order", back_populates="portfolio")  # type: ignore
     balances: Mapped[List["Balance"]] = relationship(  # type: ignore
-        "Balance", back_populates="portfolios"
+        "Balance", back_populates="portfolio"
     )
     positions: Mapped[List["Position"]] = relationship(  # type: ignore
-        "Position", back_populates="portfolios"
+        "Position", back_populates="portfolio"
     )
     leverages: Mapped[List["Leverage"]] = relationship(  # type: ignore
-        "Leverage", back_populates="portfolios"
+        "Leverage", back_populates="portfolio"
     )
