@@ -137,8 +137,13 @@ class BalanceService(Service):
         return await self.create(data=balance_schema)
 
     async def update_leverage(
-        self,
-        portfolio_id: str,
-        asset: Asset,
-    ) -> Balance:
-        pass
+        self, portfolio_id: str, asset: Asset, leverage: float
+    ) -> Optional[Balance]:
+        balance = await self.read_by_asset(portfolio_id=portfolio_id, asset=asset)
+        if balance:
+            balance.leverage = leverage
+            LOGGER.info(
+                f"updating balance leverage {portfolio_id=} {asset=} {leverage=}"
+            )
+            await self.update_entity(balance)
+        return balance

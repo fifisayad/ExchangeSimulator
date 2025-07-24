@@ -44,7 +44,7 @@ async def get_balance(
     raise HTTPException(status_code=404, detail="balance not found")
 
 
-@balance_router.post("/deposit", response_model=BalanceResponseSchema)
+@balance_router.patch("/deposit", response_model=BalanceResponseSchema)
 async def deposit_balance(
     balance_dposit: BalanceDepositSchema,
     balance_service: BalanceService = Depends(get_balance_service),
@@ -79,4 +79,14 @@ async def update_balance_leverage(
     balance_leverage: BalanceLeverageSchema,
     balance_service: BalanceService = Depends(get_balance_service),
 ):
-    pass
+    balance = await balance_service.update_leverage(
+        portfolio_id=balance_leverage.portfolio_id,
+        asset=balance_leverage.asset,
+        leverage=balance_leverage.leverage,
+    )
+    if balance:
+        return balance
+    raise HTTPException(
+        status_code=400,
+        detail=f"asset not found with this {balance_leverage.portfolio_id=} and {balance_leverage.asset=}",
+    )
