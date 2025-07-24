@@ -15,3 +15,20 @@ class OrderSchema(BaseModel):
     status: OrderStatus = OrderStatus.ACTIVE
     side: OrderSide = OrderSide.BUY
     type: OrderType = OrderType.LIMIT
+
+
+class OrderResponseSchema(BaseModel):
+    id: str
+    portfolio_id: str
+    market: Market
+    fee: float
+    price: float
+    size: float
+    status: OrderStatus
+    side: OrderSide
+    type: OrderType
+
+
+class OrderReadSchema(BaseModel):
+    id: str | None = None
+    portfolio_id: str | None = None
