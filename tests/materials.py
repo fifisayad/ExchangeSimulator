@@ -1,4 +1,5 @@
 import random
+import uuid
 from typing import List
 import pytest
 
@@ -11,7 +12,7 @@ from src.enums.order_side import OrderSide
 from src.enums.order_status import OrderStatus
 from src.enums.position_side import PositionSide
 from src.enums.position_status import PositionStatus
-from src.schemas import PortfolioSchema, BalanceSchema, OrderSchema
+from src.schemas import PortfolioSchema, BalanceSchema, OrderSchema, LeverageSchema
 from src.common.settings import Setting
 from src.schemas.position_schema import PositionSchema
 
@@ -98,3 +99,23 @@ def position_factory():
         return position_schemas
 
     return create_positions
+
+
+@pytest.fixture
+def leverage_factory():
+    def create_leverage(count: int = 5) -> List[LeverageSchema]:
+        leverage_schemas = list()
+        leverages = [1, 2, 3, 4, 5]
+        for i in range(count):
+            portfolio_id = str(uuid.uuid4())
+            for market in Market:
+                leverage_schemas.append(
+                    LeverageSchema(
+                        portfolio_id=portfolio_id,
+                        market=market,
+                        leverage=random.choice(leverages),
+                    )
+                )
+        return leverage_schemas
+
+    return create_leverage
