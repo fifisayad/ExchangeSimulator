@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
+from ..helpers.position_helpers import PositionHelpers
 from ..common.exceptions import NotEnoughBalance
 from ..enums.market import Market
 from ..enums.order_side import OrderSide
@@ -10,6 +11,7 @@ from ..enums.order_status import OrderStatus
 from ..repository import OrderRepository
 from ..models import Order
 from ..schemas import OrderSchema
+from .position_service import PositionService
 
 
 # TODO: REFACTOR get orders with filter and make it flexible
@@ -21,6 +23,7 @@ class OrderService(Service):
     def __init__(self):
         """Initializes the OrderService with its order repository."""
         self._repo = OrderRepository()
+        self.position_service = PositionService()
 
     @property
     def repo(self) -> OrderRepository:
@@ -57,34 +60,6 @@ class OrderService(Service):
         order.position_id = position_id
         await self.repo.update_entity(order)
 
-    async def fee_calc(self, orders: Union[Order, List[Order]]) -> None:
-        """Calculates and applies trading fees to one or more orders based on
-        order type, side, and whether the market is perpetual or spot.
-
-        Args:
-            orders (Union[Order, List[Order]]): A single order or a list of orders to calculate fees for.
-        """
-        orders_list = [orders] if isinstance(orders, Order) else orders
-        for order in orders_list:
-            order_total = order.size * order.price
-            if order.market.is_perptual():
-                if order.type == OrderType.LIMIT:
-                    order.fee = order.portfolio.perp_maker_fee * order_total
-                elif order.type == OrderType.MARKET:
-                    order.fee = order.portfolio.perp_taker_fee * order_total
-            else:
-                if order.type == OrderType.LIMIT:
-                    if order.side == OrderSide.BUY:
-                        order.fee = order.size * order.portfolio.spot_maker_fee
-                    else:
-                        order.fee = order_total * order.portfolio.spot_maker_fee
-                elif order.type == OrderType.MARKET:
-                    if order.side == OrderSide.BUY:
-                        order.fee = order.size * order.portfolio.spot_taker_fee
-                    else:
-                        order.fee = order_total * order.portfolio.spot_taker_fee
-            await self.repo.update_entity(entity=order)
-
     async def read_orders_by_portfolio_id(self, portfolio_id: str) -> List[Order]:
         return await self.repo.get_entities_by_portfolio_id(portfolio_id=portfolio_id)
 
@@ -108,6 +83,23 @@ class OrderService(Service):
         side: OrderSide,
         order_type: OrderType,
     ) -> bool:
+        open_position = await self.position_service.get_by_portfolio_and_market(
+            portfolio_id=portfolio_id, market=market
+        )
+        if open_position:
+            # there is an active position
+            if PositionHelpers().is_order_against_position(
+                order_side=side, position_side=open_position.side
+            ):
+                # order against position
+                pass
+            else:
+                # order and position are same direction
+                pass
+        else:
+            # there isn't active postion
+            pass
+
         return False
 
     async def create_order(
