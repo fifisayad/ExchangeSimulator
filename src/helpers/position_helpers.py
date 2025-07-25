@@ -56,31 +56,26 @@ class PositionHelpers:
         return (size / leverage) * price
 
     @staticmethod
-    def is_order_against_position(order: Order, position: Position) -> bool:
+    def is_order_against_position(
+        order_side: OrderSide, position_side: PositionSide
+    ) -> bool:
         """Checks if the given order opposes the direction of an existing position.
 
         Args:
-            order (Order): The order to evaluate.
-            position (Position): The existing position.
+            order_side (OrderSide): The order side to evaluate.
+            position (PositionSide): The existing position side.
 
         Returns:
             bool: True if the order is against the position, False otherwise.
 
-        Raises:
-            ValueError: If the order and position markets do not match.
         """
-        if order.market != position.market:
-            raise ValueError(
-                f"""[PositionHelper-is_order_against_position]: order market {order.market} is 
-                not equal with position market {position.market}"""
-            )
-        if order.side == OrderSide.BUY:
-            if position.side == PositionSide.SHORT:
+        if order_side == OrderSide.BUY:
+            if position_side == PositionSide.SHORT:
                 return True
             else:
                 return False
         else:
-            if position.side == PositionSide.LONG:
+            if position_side == PositionSide.LONG:
                 return True
             else:
                 return False

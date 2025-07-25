@@ -70,7 +70,7 @@ class PositionService(Service):
             order (Order): The incoming order.
             position (Position): The existing position.
         """
-        if PositionHelpers.is_order_against_position(order, position):
+        if PositionHelpers.is_order_against_position(order.side, position.side):
             if order.size >= position.size:
                 await self.close_position(order, position)
             else:
