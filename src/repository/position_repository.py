@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fifi import db_async_session
 from fifi.exceptions import NotExistedSessionException
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .simulator_base_repository import SimulatorBaseRepository
@@ -64,3 +64,22 @@ class PositionRepository(SimulatorBaseRepository):
 
         results = await session.execute(stmt)
         return list(results.scalars().all())
+
+    @db_async_session
+    async def get_by_portfolio_and_market(
+        self,
+        portfolio_id: str,
+        market: Market,
+        with_for_update: bool = False,
+        session: Optional[AsyncSession] = None,
+    ) -> Optional[Position]:
+        if not session:
+            raise NotExistedSessionException("session is not existed")
+        stmt = select(self.model).where(
+            and_(Position.market == market, Position.portfolio_id == portfolio_id)
+        )
+        if with_for_update:
+            stmt = stmt.with_for_update()
+
+        results = await session.execute(stmt)
+        return results.unique().scalar_one_or_none()
