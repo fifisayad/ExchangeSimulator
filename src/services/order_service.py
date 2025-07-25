@@ -86,10 +86,24 @@ class OrderService(Service):
         self,
         portfolio_id: str,
         market: Market,
+        price: float,
         size: float,
         side: OrderSide,
-        fee: float,
     ) -> bool:
+        payment_asset = OrderHelper().get_payment_asset(market=market, side=side)
+        payment_asset_total = OrderHelper.spot_order_payment_asset_total(
+            price=price, size=size, side=side
+        )
+        if self.balance_service.check_available_qty(
+            portfolio_id=portfolio_id,
+            asset=payment_asset,
+            qty=payment_asset_total,
+        ):
+            return await self.balance_service.lock_balance(
+                portfolio_id=portfolio_id,
+                asset=payment_asset,
+                locked_qty=payment_asset_total,
+            )
         return False
 
     async def check_lock_balance_for_perp_limit_order_creation(
@@ -171,9 +185,9 @@ class OrderService(Service):
             is_ok = await self.check_lock_balance_for_spot_limit_order_creation(
                 portfolio_id=portfolio_id,
                 market=market,
+                price=price,
                 size=size,
                 side=side,
-                fee=order_fee,
             )
         if not is_ok:
             raise NotEnoughBalance(
