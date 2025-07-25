@@ -7,7 +7,7 @@ from ..enums.market import Market
 
 class OrderHelper:
     @staticmethod
-    def get_payment_asset(market: Market, side: OrderSide) -> Asset:
+    def get_fee_payment_asset(market: Market, side: OrderSide) -> Asset:
         if market.is_perptual():
             return Asset.USD
         market_coins = market.value.replace("_prep", "")
@@ -17,6 +17,18 @@ class OrderHelper:
             return Asset[second_coin.upper()]
         else:
             return Asset[first_coin.upper()]
+
+    @staticmethod
+    def get_payment_asset(market: Market, side: OrderSide) -> Asset:
+        if market.is_perptual():
+            return Asset.USD
+        market_coins = market.value.replace("_prep", "")
+        first_coin = market_coins[:3]
+        second_coin = market_coins[3:]
+        if side == OrderSide.BUY:
+            return Asset[first_coin.upper()]
+        else:
+            return Asset[second_coin.upper()]
 
     @staticmethod
     def fee_calc(
