@@ -5,7 +5,7 @@ from ..enums.market import Market
 
 class OrderHelper:
     @staticmethod
-    def get_payment_asset_enum(market: Market, side: OrderSide) -> Asset:
+    def get_payment_asset(market: Market, side: OrderSide) -> Asset:
         if market.is_perptual():
             return Asset.USD
         market_coins = market.value.replace("_prep", "")
