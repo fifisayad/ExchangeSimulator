@@ -52,3 +52,15 @@ class OrderHelper:
             else:
                 fee = 0
         return fee
+
+    @staticmethod
+    def spot_order_payment_asset_total(
+        price: float,
+        size: float,
+        side: OrderSide,
+    ) -> float:
+        order_total = size * price
+        if side == OrderSide.BUY:
+            return order_total
+        else:
+            return size
