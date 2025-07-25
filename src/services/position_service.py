@@ -1,6 +1,7 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from fifi import GetLogger
 
+from ..enums.market import Market
 from ..enums.asset import Asset
 from ..enums.position_status import PositionStatus
 from ..models import Order, Position
@@ -54,6 +55,13 @@ class PositionService(Service):
         for position in open_positions:
             positions[f"{position.market}_{position.portfolio_id}"] = position
         return positions
+
+    async def get_by_portfolio_and_market(
+        self, portfolio_id: str, market: Market
+    ) -> Optional[Position]:
+        return await self._repo.get_by_portfolio_and_market(
+            portfolio_id=portfolio_id, market=market
+        )
 
     async def apply_order_to_position(self, order: Order, position: Position) -> None:
         """Applies an order to an existing position, either merging or closing it.
