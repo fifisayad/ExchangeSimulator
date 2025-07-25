@@ -156,6 +156,7 @@ class BalanceService(Service):
         if asset_balance:
             asset_balance.fee_paid += paid_qty
             asset_balance.available -= paid_qty
+            asset_balance.quantity -= paid_qty
             await self.repo.update_entity(asset_balance)
             return True
         LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
