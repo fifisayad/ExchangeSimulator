@@ -141,3 +141,12 @@ class BalanceService(Service):
             f"creating new balance for {portfolio_id=}, {asset.value=} with {qty=}"
         )
         return await self.create(data=balance_schema)
+
+    async def check_available_qty(
+        self, portfolio_id: str, asset: Asset, qty: float
+    ) -> bool:
+        balance = await self.read_by_asset(portfolio_id=portfolio_id, asset=asset)
+        if balance:
+            if balance.available >= qty:
+                return True
+        return False
