@@ -150,3 +150,13 @@ class BalanceService(Service):
             if balance.available >= qty:
                 return True
         return False
+
+    async def pay_fee(self, portfolio_id: str, asset: Asset, paid_qty: float) -> bool:
+        asset_balance = await self.read_by_asset(portfolio_id, asset)
+        if asset_balance:
+            asset_balance.fee_paid += paid_qty
+            asset_balance.available -= paid_qty
+            await self.repo.update_entity(asset_balance)
+            return True
+        LOGGER.warning(f"No balance found for {portfolio_id=} {asset=}")
+        return False
