@@ -7,6 +7,7 @@ from ..common.exceptions import InvalidOrder, NotEnoughBalance
 from ..enums.market import Market
 from ..enums.order_side import OrderSide
 from ..enums.order_type import OrderType
+from ..enums.asset import Asset
 from .service import Service
 from ..enums.order_status import OrderStatus
 from ..repository import OrderRepository
@@ -68,59 +69,78 @@ class OrderService(Service):
     async def read_orders_by_portfolio_id(self, portfolio_id: str) -> List[Order]:
         return await self.repo.get_entities_by_portfolio_id(portfolio_id=portfolio_id)
 
-    async def check_lock_balance_for_spot_order(
+    async def check_lock_balance(
+        self, portfolio_id: str, asset: Asset, qty: float, fee: float
+    ) -> bool:
+        is_locked = await self.balance_service.lock_balance(
+            portfolio_id=portfolio_id, asset=asset, locked_qty=qty
+        )
+        is_paid = await self.balance_service.pay_fee(
+            portfolio_id=portfolio_id, asset=asset, paid_qty=fee
+        )
+        if is_locked and is_paid:
+            return True
+        return False
+
+    async def check_lock_balance_for_spot_limit_order_creation(
         self,
         portfolio_id: str,
         market: Market,
-        price: float,
         size: float,
         side: OrderSide,
-        order_type: OrderType,
+        fee: float,
     ) -> bool:
         return False
 
-    async def check_lock_balance_for_perp_order(
+    async def check_lock_balance_for_perp_limit_order_creation(
         self,
         portfolio_id: str,
         market: Market,
         price: float,
         size: float,
         side: OrderSide,
-        order_type: OrderType,
         fee: float,
     ) -> bool:
         open_position = await self.position_service.get_by_portfolio_and_market(
             portfolio_id=portfolio_id, market=market
         )
         payment_asset = OrderHelper().get_payment_asset(market=market, side=side)
+        order_total = price * size
         if open_position:
             # there is an active position
             if PositionHelpers().is_order_against_position(
                 order_side=side, position_side=open_position.side
             ):
                 # order against position
-                pass
-            else:
-                # order and position are same direction
-                pass
-        else:
-            # there isn't active postion
-            if self.balance_service.check_available_qty(
-                portfolio_id=portfolio_id, asset=payment_asset, qty=size + fee
-            ):
-                await self.balance_service.lock_balance(
-                    portfolio_id=portfolio_id, asset=payment_asset, locked_qty=size
-                )
-
+                if open_position.size >= size:
+                    return True
+                else:
+                    raise InvalidOrder(
+                        f"""there is an active position for {portfolio_id=}
+                        with {open_position.size=}
+                        order size must be equal or lessen than position size
+                        """
+                    )
+        # order and position are same direction + there isn't active position
+        if self.balance_service.check_available_qty(
+            portfolio_id=portfolio_id,
+            asset=payment_asset,
+            qty=order_total + fee,
+        ):
+            return await self.check_lock_balance(
+                portfolio_id=portfolio_id,
+                asset=payment_asset,
+                qty=order_total,
+                fee=fee,
+            )
         return False
 
-    async def create_order(
+    async def create_limit_order(
         self,
         portfolio_id: str,
         market: Market,
         price: float,
         size: float,
-        order_type: OrderType,
         side: OrderSide,
     ) -> Optional[Order]:
         order = None
@@ -135,28 +155,25 @@ class OrderService(Service):
             price=price,
             size=size,
             side=side,
-            order_type=order_type,
+            order_type=OrderType.LIMIT,
             portfolio=portfolio,
         )
         if market.is_perptual():
-            is_ok = await self.check_lock_balance_for_perp_order(
+            is_ok = await self.check_lock_balance_for_perp_limit_order_creation(
                 portfolio_id=portfolio_id,
                 market=market,
                 price=price,
                 size=size,
-                order_type=order_type,
                 side=side,
-                fee=fee,
+                fee=order_fee,
             )
         else:
-            is_ok = await self.check_lock_balance_for_spot_order(
+            is_ok = await self.check_lock_balance_for_spot_limit_order_creation(
                 portfolio_id=portfolio_id,
                 market=market,
-                price=price,
                 size=size,
-                order_type=order_type,
                 side=side,
-                fee=fee,
+                fee=order_fee,
             )
         if not is_ok:
             raise NotEnoughBalance(
@@ -171,7 +188,7 @@ class OrderService(Service):
             fee=order_fee,
             size=size,
             side=side,
-            type=order_type,
+            type=OrderType.LIMIT,
         )
         order = await self.create(data=order_schema)
         return order
