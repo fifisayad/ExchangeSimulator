@@ -31,3 +31,4 @@ class BalanceResponseSchema(BaseModel):
     available: float
     frozen: float
     burned: float
+    fee_paid: float

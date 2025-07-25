@@ -22,7 +22,12 @@ class Balance(DatetimeDecoratedBase):
         CheckConstraint("frozen >= 0", name="ck_value_positive"), nullable=False
     )
     burned: Mapped[float] = mapped_column(
-        CheckConstraint("frozen >= 0", name="ck_value_positive"),
+        CheckConstraint("burned >= 0", name="ck_value_positive"),
+        default=0,
+        nullable=False,
+    )
+    fee_paid: Mapped[float] = mapped_column(
+        CheckConstraint("fee_paid >= 0", name="ck_value_positive"),
         default=0,
         nullable=False,
     )

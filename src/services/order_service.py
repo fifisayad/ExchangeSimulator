@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
+from ..helpers.order_helper import OrderHelper
 from ..helpers.position_helpers import PositionHelpers
-from ..common.exceptions import NotEnoughBalance
+from ..common.exceptions import InvalidOrder, NotEnoughBalance
 from ..enums.market import Market
 from ..enums.order_side import OrderSide
 from ..enums.order_type import OrderType
@@ -12,6 +13,8 @@ from ..repository import OrderRepository
 from ..models import Order
 from ..schemas import OrderSchema
 from .position_service import PositionService
+from .balance_service import BalanceService
+from .portfolio_service import PortfolioService
 
 
 # TODO: REFACTOR get orders with filter and make it flexible
@@ -24,6 +27,8 @@ class OrderService(Service):
         """Initializes the OrderService with its order repository."""
         self._repo = OrderRepository()
         self.position_service = PositionService()
+        self.balance_service = BalanceService()
+        self.portfolio_service = PortfolioService()
 
     @property
     def repo(self) -> OrderRepository:
@@ -82,10 +87,12 @@ class OrderService(Service):
         size: float,
         side: OrderSide,
         order_type: OrderType,
+        fee: float,
     ) -> bool:
         open_position = await self.position_service.get_by_portfolio_and_market(
             portfolio_id=portfolio_id, market=market
         )
+        payment_asset = OrderHelper().get_payment_asset(market=market, side=side)
         if open_position:
             # there is an active position
             if PositionHelpers().is_order_against_position(
@@ -98,7 +105,12 @@ class OrderService(Service):
                 pass
         else:
             # there isn't active postion
-            pass
+            if self.balance_service.check_available_qty(
+                portfolio_id=portfolio_id, asset=payment_asset, qty=size + fee
+            ):
+                await self.balance_service.lock_balance(
+                    portfolio_id=portfolio_id, asset=payment_asset, locked_qty=size
+                )
 
         return False
 
@@ -113,6 +125,19 @@ class OrderService(Service):
     ) -> Optional[Order]:
         order = None
         is_ok = False
+
+        portfolio = await self.portfolio_service.read_by_id(id=portfolio_id)
+        if not portfolio:
+            raise InvalidOrder(f"{portfolio_id=} is invalid")
+
+        order_fee = OrderHelper.fee_calc(
+            market=market,
+            price=price,
+            size=size,
+            side=side,
+            order_type=order_type,
+            portfolio=portfolio,
+        )
         if market.is_perptual():
             is_ok = await self.check_lock_balance_for_perp_order(
                 portfolio_id=portfolio_id,
@@ -121,6 +146,7 @@ class OrderService(Service):
                 size=size,
                 order_type=order_type,
                 side=side,
+                fee=fee,
             )
         else:
             is_ok = await self.check_lock_balance_for_spot_order(
@@ -130,10 +156,14 @@ class OrderService(Service):
                 size=size,
                 order_type=order_type,
                 side=side,
+                fee=fee,
             )
         if not is_ok:
-            raise NotEnoughBalance("")
-        order_fee = await self.fee_calc(order)
+            raise NotEnoughBalance(
+                f"""{side=} order for 
+            {portfolio_id=} on {market=} 
+            with {size=} can not be created"""
+            )
         order_schema = OrderSchema(
             portfolio_id=portfolio_id,
             market=market,
