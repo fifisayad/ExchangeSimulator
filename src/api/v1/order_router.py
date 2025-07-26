@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from ...common.exceptions import InvalidOrder
 from ...engines.matching_engine import MatchingEngine
 from ...schemas.order_schema import (
+    OrderCancelSchema,
     OrderCreateSchema,
     OrderReadSchema,
     OrderResponseSchema,
@@ -61,6 +62,19 @@ async def create_order(
             side=order_create_schema.side,
             order_type=order_create_schema.type,
         )
+    except InvalidOrder as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@order_router.patch("", response_model=OrderResponseSchema)
+async def cancel_order(
+    order_cancel_schema: OrderCancelSchema,
+    matching_engine: MatchingEngine = Depends(get_matching_engine),
+):
+    try:
+        return await matching_engine.cancel_order(order_id=order_cancel_schema.id)
     except InvalidOrder as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:
