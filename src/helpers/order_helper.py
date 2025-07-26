@@ -66,24 +66,30 @@ class OrderHelper:
         return fee
 
     @staticmethod
-    def spot_order_payment_asset_total(
+    def get_order_payment_asset_total(
+        market: Market,
         price: float,
         size: float,
         side: OrderSide,
     ) -> float:
         order_total = size * price
+        if market.is_perptual():
+            return order_total
         if side == OrderSide.BUY:
             return order_total
         else:
             return size
 
     @staticmethod
-    def spot_order_recieved_asset_total(
+    def get_order_recieved_asset_total(
+        market: Market,
         price: float,
         size: float,
         side: OrderSide,
     ) -> float:
         order_total = size * price
+        if market.is_perptual():
+            return order_total
         if side == OrderSide.BUY:
             return size
         else:
