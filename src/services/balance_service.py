@@ -26,9 +26,6 @@ class BalanceService(Service):
     def repo(self) -> BalanceRepository:
         return self._repo
 
-    async def update_balances(self, order: Order) -> None:
-        pass
-
     async def burn_balance(
         self, portfolio_id: str, asset: Asset, burned_qty: float
     ) -> bool:
