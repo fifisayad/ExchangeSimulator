@@ -4,6 +4,7 @@ from .portfolio_router import portfolio_router
 from .balance_router import balance_router
 from .leverage_router import leverage_router
 from .order_router import order_router
+from .position_router import position_router
 
 
 @asynccontextmanager
@@ -20,3 +21,4 @@ router.include_router(portfolio_router)
 router.include_router(balance_router)
 router.include_router(leverage_router)
 router.include_router(order_router)
+router.include_router(position_router)
