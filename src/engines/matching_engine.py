@@ -62,6 +62,41 @@ class MatchingEngine(Engine):
                 if not order.market.is_perptual():
                     await self.balance_service.update_balances(order)
 
+    async def fill_order(self, order: Order) -> None:
+        order.status = OrderStatus.FILLED
+        if not order.market.is_perptual():
+            payment_asset = OrderHelper.get_payment_asset(
+                market=order.market, side=order.side
+            )
+            payment_total = OrderHelper.spot_order_payment_asset_total(
+                price=order.price, size=order.size, side=order.side
+            )
+            recieved_asset = OrderHelper.get_recieved_asset(
+                market=order.market, side=order.side
+            )
+            recieved_total = OrderHelper.spot_order_recieved_asset_total(
+                price=order.price, size=order.size, side=order.side
+            )
+
+            await self.balance_service.unlock_balance(
+                portfolio_id=order.portfolio_id,
+                asset=payment_asset,
+                unlocked_qty=payment_total,
+            )
+
+            await self.balance_service.add_balance(
+                portfolio_id=order.portfolio_id,
+                asset=recieved_asset,
+                qty=recieved_total,
+            )
+
+            await self.balance_service.pay_fee(
+                portfolio_id=order.portfolio_id,
+                asset=recieved_asset,
+                paid_qty=order.fee,
+            )
+            await self.order_service.update_entity(order)
+
     async def perpetual_open_position_check(
         self, market: Market, portfolio_id: str, size: float, side: OrderSide
     ) -> bool:
