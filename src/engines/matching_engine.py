@@ -1,7 +1,7 @@
 from typing import Optional
 from fifi import GetLogger, singleton
 
-from ..common.exceptions import InvalidOrder, NotEnoughBalance
+from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
 from ..enums.market import Market
 from ..helpers.order_helper import OrderHelper
 from ..helpers.position_helpers import PositionHelpers
@@ -59,20 +59,45 @@ class MatchingEngine(Engine):
                 else:
                     continue
 
+    async def cancel_order(self, order_id: str) -> Order:
+        order = await self.order_service.read_by_id(id=order_id)
+        if not order:
+            raise NotFoundOrder(f"{order_id=}")
+
+        if order.status == OrderStatus.FILLED:
+            raise InvalidOrder(f"this {order_id=} is filled!!!")
+        order.status = OrderStatus.CANCELED
+
+        payment_asset = OrderHelper.get_payment_asset(
+            market=order.market, side=order.side
+        )
+        payment_total = OrderHelper.get_order_payment_asset_total(
+            market=order.market, price=order.price, size=order.size, side=order.side
+        )
+
+        await self.balance_service.unlock_balance(
+            portfolio_id=order.portfolio_id,
+            asset=payment_asset,
+            unlocked_qty=payment_total,
+        )
+
+        await self.order_service.update_entity(order)
+        return order
+
     async def fill_order(self, order: Order) -> None:
         order.status = OrderStatus.FILLED
         if not order.market.is_perptual():
             payment_asset = OrderHelper.get_payment_asset(
                 market=order.market, side=order.side
             )
-            payment_total = OrderHelper.spot_order_payment_asset_total(
-                price=order.price, size=order.size, side=order.side
+            payment_total = OrderHelper.get_order_payment_asset_total(
+                market=order.market, price=order.price, size=order.size, side=order.side
             )
             recieved_asset = OrderHelper.get_recieved_asset(
                 market=order.market, side=order.side
             )
-            recieved_total = OrderHelper.spot_order_recieved_asset_total(
-                price=order.price, size=order.size, side=order.side
+            recieved_total = OrderHelper.get_order_recieved_asset_total(
+                market=order.market, price=order.price, size=order.size, side=order.side
             )
 
             await self.balance_service.unlock_balance(
@@ -154,8 +179,11 @@ class MatchingEngine(Engine):
                 side=order_schema.side,
             )
         else:
-            payment_total = OrderHelper.spot_order_payment_asset_total(
-                price=order_schema.price, side=order_schema.side, size=order_schema.size
+            payment_total = OrderHelper.get_order_payment_asset_total(
+                market=order_schema.market,
+                price=order_schema.price,
+                side=order_schema.side,
+                size=order_schema.size,
             )
 
         checked_available_qty = False
