@@ -7,7 +7,7 @@ from ..enums.market import Market
 
 class OrderHelper:
     @staticmethod
-    def get_fee_payment_asset(market: Market, side: OrderSide) -> Asset:
+    def get_recieved_asset(market: Market, side: OrderSide) -> Asset:
         if market.is_perptual():
             return Asset.USD
         market_coins = market.value.replace("_prep", "")
@@ -76,3 +76,15 @@ class OrderHelper:
             return order_total
         else:
             return size
+
+    @staticmethod
+    def spot_order_recieved_asset_total(
+        price: float,
+        size: float,
+        side: OrderSide,
+    ) -> float:
+        order_total = size * price
+        if side == OrderSide.BUY:
+            return size
+        else:
+            return order_total
