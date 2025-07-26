@@ -1,3 +1,4 @@
+from fifi import singleton
 from ..enums.order_side import OrderSide
 from ..enums.order_status import OrderStatus
 from ..enums.order_type import OrderType
@@ -6,6 +7,7 @@ from ..repository import *
 from .engine import Engine
 
 
+@singleton
 class MatchingEngine(Engine):
     name: str = "matching_engine"
 
