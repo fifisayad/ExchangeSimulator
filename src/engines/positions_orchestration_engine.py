@@ -134,13 +134,19 @@ class PositionsOrchestrationEngine(Engine):
         )
 
         # unlock margin
+        last_position_margin = position.margin
+        position.size -= order.size
+        position.margin = PositionHelpers.margin_calc(
+            size=position.size, leverage=position.leverage, price=position.entry_price
+        )
+        LOGGER.debug(
+            f"{position.id=} margin was {last_position_margin=} and it's now {position.margin=}"
+        )
         is_unlocked = await self.balance_service.unlock_balance(
             portfolio_id=position.portfolio_id,
             asset=Asset.USD,
-            unlocked_qty=position.entry_price * order.size,
+            unlocked_qty=last_position_margin - position.margin,
         )
-        position.margin -= position.entry_price * order.size
-        position.size -= order.size
 
         # add pnl value
         is_realized = await self.balance_service.add_balance(
