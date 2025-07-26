@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union, overload
 from fifi import RedisSubscriber, singleton, GetLogger
 
 from ..enums.market import Market
@@ -19,6 +19,11 @@ class MarketMonitoringService:
         for market in Setting().ACTIVE_MARKETS:
             # TODO: implement monitoring connection flow
             pass
+
+    @overload
+    def get_last_trade(self, market: Market) -> float: ...
+    @overload
+    def get_last_trade(self, market: None = None) -> Dict[Market, float]: ...
 
     def get_last_trade(
         self, market: Optional[Market] = None
