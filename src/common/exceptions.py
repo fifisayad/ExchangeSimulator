@@ -4,3 +4,7 @@ class InvalidOrder(Exception):
 
 class NotEnoughBalance(InvalidOrder):
     pass
+
+
+class NotFoundOrder(InvalidOrder):
+    pass
