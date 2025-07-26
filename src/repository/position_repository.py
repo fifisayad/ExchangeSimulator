@@ -27,9 +27,10 @@ class PositionRepository(SimulatorBaseRepository):
     @db_async_session
     async def get_all_positions(
         self,
+        portfolio_id: Optional[str] = None,
+        market: Optional[Market] = None,
         status: Optional[PositionStatus] = None,
         side: Optional[PositionSide] = None,
-        market: Optional[Market] = None,
         with_for_update: bool = False,
         session: Optional[AsyncSession] = None,
     ) -> List[Position]:
@@ -52,6 +53,8 @@ class PositionRepository(SimulatorBaseRepository):
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model)
+        if portfolio_id:
+            stmt = stmt.where(Position.portfolio_id == portfolio_id)
         if status:
             stmt = stmt.where(Position.status == status)
         if side:
