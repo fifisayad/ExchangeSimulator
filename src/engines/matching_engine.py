@@ -86,15 +86,15 @@ class MatchingEngine(Engine):
 
     async def fill_order(self, order: Order) -> None:
         order.status = OrderStatus.FILLED
+        recieved_asset = OrderHelper.get_recieved_asset(
+            market=order.market, side=order.side
+        )
         if not order.market.is_perptual():
             payment_asset = OrderHelper.get_payment_asset(
                 market=order.market, side=order.side
             )
             payment_total = OrderHelper.get_order_payment_asset_total(
                 market=order.market, price=order.price, size=order.size, side=order.side
-            )
-            recieved_asset = OrderHelper.get_recieved_asset(
-                market=order.market, side=order.side
             )
             recieved_total = OrderHelper.get_order_recieved_asset_total(
                 market=order.market, price=order.price, size=order.size, side=order.side
@@ -112,12 +112,13 @@ class MatchingEngine(Engine):
                 qty=recieved_total,
             )
 
-            await self.balance_service.pay_fee(
-                portfolio_id=order.portfolio_id,
-                asset=recieved_asset,
-                paid_qty=order.fee,
-            )
-            await self.order_service.update_entity(order)
+        # fee should be paid for any orders
+        await self.balance_service.pay_fee(
+            portfolio_id=order.portfolio_id,
+            asset=recieved_asset,
+            paid_qty=order.fee,
+        )
+        await self.order_service.update_entity(order)
 
     async def perpetual_open_position_check(
         self, market: Market, portfolio_id: str, size: float, side: OrderSide
