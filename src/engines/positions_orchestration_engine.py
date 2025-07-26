@@ -1,3 +1,4 @@
+from fifi import singleton
 from fifi.helpers.get_current_time import GetCurrentTime
 
 from src.enums.position_side import PositionSide
@@ -10,6 +11,7 @@ from ..services import (
 from .engine import Engine
 
 
+@singleton
 class PositionsOrchestrationEngine(Engine):
     name: str = "positions_orchestration_engine"
 
