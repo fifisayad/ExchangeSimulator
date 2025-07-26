@@ -1,6 +1,7 @@
 from fastapi import APIRouter, FastAPI
 from contextlib import asynccontextmanager
 from ..engines.matching_engine import MatchingEngine
+from ..engines.positions_orchestration_engine import PositionsOrchestrationEngine
 from ..common.settings import Setting
 from .v1.router import router as router_v1
 
@@ -12,6 +13,7 @@ setting = Setting()
 async def lifespan(app: FastAPI):
     # initialize
     await MatchingEngine().start()
+    await PositionsOrchestrationEngine().start()
     yield
     # cleanup
 
