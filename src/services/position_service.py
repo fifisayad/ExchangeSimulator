@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 from fifi import GetLogger
 
+from ..enums.position_side import PositionSide
 from ..enums.market import Market
 from ..enums.position_status import PositionStatus
 from ..models import Position
@@ -25,13 +26,24 @@ class PositionService(Service):
     def repo(self) -> PositionRepository:
         return self._repo
 
+    async def get_positions(
+        self,
+        portfolio_id: Optional[str] = None,
+        market: Optional[Market] = None,
+        status: Optional[PositionStatus] = None,
+        side: Optional[PositionSide] = None,
+    ) -> List[Position]:
+        return await self.repo.get_all_positions(
+            portfolio_id=portfolio_id, market=market, status=status, side=side
+        )
+
     async def get_open_positions(self) -> List[Position]:
         """Fetches all currently open trading positions.
 
         Returns:
             List[Position]: A list of open positions.
         """
-        return await self.repo.get_all_positions(status=PositionStatus.OPEN)
+        return await self.get_positions(status=PositionStatus.OPEN)
 
     async def get_open_positions_hashmap(self) -> Dict[str, Position]:
         """Returns a hashmap of open positions keyed by market and portfolio ID.
