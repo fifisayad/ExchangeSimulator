@@ -38,3 +38,37 @@ class TestBalanceService:
         assert got_balance.quantity == 0.443
         assert got_balance.available == 0.243
         assert got_balance.frozen == 0.2
+
+    async def test_lock_balance_not_exist_portfolio_id(self, database_provider_test):
+        portfolio_id = str(uuid.uuid4())
+        balance = await self.balance_service.create_by_qty(
+            portfolio_id=portfolio_id, asset=Asset.BTC, qty=0.443
+        )
+        assert balance is not None
+
+        is_locked = await self.balance_service.lock_balance(
+            portfolio_id=str(uuid.uuid4()), asset=Asset.BTC, locked_qty=0.2
+        )
+        assert is_locked == False
+
+    async def test_lock_balance_two_times_lock(self, database_provider_test):
+        portfolio_id = str(uuid.uuid4())
+        balance = await self.balance_service.create_by_qty(
+            portfolio_id=portfolio_id, asset=Asset.BTC, qty=0.443
+        )
+        assert balance is not None
+
+        is_locked = await self.balance_service.lock_balance(
+            portfolio_id=portfolio_id, asset=Asset.BTC, locked_qty=0.2
+        )
+        assert is_locked == True
+        is_locked = await self.balance_service.lock_balance(
+            portfolio_id=portfolio_id, asset=Asset.BTC, locked_qty=0.23
+        )
+
+        got_balance = await self.balance_service.read_by_id(balance.id)
+        assert got_balance is not None
+
+        assert round(got_balance.quantity - 0.443) == 0
+        assert round(got_balance.available - 0.013) == 0
+        assert round(got_balance.frozen - 0.43) == 0
