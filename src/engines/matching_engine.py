@@ -44,23 +44,17 @@ class MatchingEngine(Engine):
             trades = self.mm_service.get_last_trade()
             for order in open_orders:
                 if order.type == OrderType.MARKET:
-                    order.price = trades[order.market]["price"]
-                    order.status = OrderStatus.FILLED
+                    continue
                 elif (
                     order.side == OrderSide.BUY and order.price >= trades[order.market]
                 ):
-                    order.status = OrderStatus.FILLED
+                    await self.fill_order(order)
                 elif (
                     order.side == OrderSide.SELL and order.price <= trades[order.market]
                 ):
-                    order.status = OrderStatus.FILLED
+                    await self.fill_order(order)
                 else:
                     continue
-
-                # fee calculations
-                await self.order_service.fee_calc(order)
-                if not order.market.is_perptual():
-                    await self.balance_service.update_balances(order)
 
     async def fill_order(self, order: Order) -> None:
         order.status = OrderStatus.FILLED
@@ -198,6 +192,6 @@ class MatchingEngine(Engine):
             )
 
         if order.type == OrderType.MARKET:
-            pass
+            await self.fill_order(order)
 
         return order
