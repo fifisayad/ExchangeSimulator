@@ -33,6 +33,12 @@ class PositionsOrchestrationEngine(Engine):
         self.leverage_service = LeverageService()
         self.mm_service = MarketMonitoringService()
 
+    async def preprocess(self):
+        pass
+
+    async def postprocess(self):
+        pass
+
     async def process(self):
         last_update = GetCurrentTime().get()
         while True:
