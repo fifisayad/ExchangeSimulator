@@ -32,7 +32,10 @@ class MatchingEngine(Engine):
     async def preprocess(self):
         pass
 
-    async def Process(self):
+    async def postprocess(self):
+        pass
+
+    async def process(self):
         while True:
             # get open orders from db
             open_orders = await self.order_service.get_open_orders()
