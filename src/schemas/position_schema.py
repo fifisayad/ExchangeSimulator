@@ -15,3 +15,24 @@ class PositionSchema(BaseModel):
     size: float = 0
     leverage: float = 0
     margin: float = 0
+
+
+class PositionReadSchema(BaseModel):
+    id: str | None = None
+    portfolio_id: str | None = None
+    market: Market | None = None
+    side: PositionSide | None = None
+    status: PositionStatus | None = None
+
+
+class PositionResponseSchema(BaseModel):
+    id: str
+    portfolio_id: str
+    market: Market
+    side: PositionSide
+    status: PositionStatus
+    entry_price: float
+    lqd_price: float
+    size: float
+    leverage: float
+    margin: float
