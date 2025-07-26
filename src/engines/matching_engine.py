@@ -1,5 +1,5 @@
 from typing import Optional
-from fifi import singleton
+from fifi import GetLogger, singleton
 
 from ..common.exceptions import InvalidOrder, NotEnoughBalance
 from ..enums.market import Market
@@ -13,6 +13,8 @@ from ..enums.order_type import OrderType
 from ..services import *
 from ..repository import *
 from .engine import Engine
+
+LOGGER = GetLogger().get()
 
 
 @singleton
@@ -75,12 +77,12 @@ class MatchingEngine(Engine):
                 if open_position.size >= size:
                     return True
                 else:
-                    raise InvalidOrder(
-                        f"""there is an active position for {portfolio_id=}
+                    er_msg = f"""there is an active position for {portfolio_id=}
                         with {open_position.size=}
                         order size must be equal or lessen than position size
                         """
-                    )
+                    LOGGER.error(er_msg)
+                    raise InvalidOrder(er_msg)
         return False
 
     async def create_order(
@@ -94,6 +96,7 @@ class MatchingEngine(Engine):
     ) -> Order:
         portfolio = await self.portfolio_service.read_by_id(id=portfolio_id)
         if not portfolio:
+            LOGGER.error(f"{portfolio_id=} is invalid")
             raise InvalidOrder(f"{portfolio_id=} is invalid")
 
         order_schema = OrderSchema(
@@ -129,11 +132,11 @@ class MatchingEngine(Engine):
                 portfolio_id=portfolio_id, asset=payment_asset, qty=payment_total
             )
             if not checked_available_qty:
-                raise NotEnoughBalance(
-                    f"""{side=} order for 
+                er_msg = f"""{side=} order for 
                     {portfolio_id=} on {market=} 
                     with {size=} can not be created"""
-                )
+                LOGGER.error(er_msg)
+                raise NotEnoughBalance(er_msg)
 
         if checked_available_qty:
             if order_schema.type == OrderType.LIMIT:
@@ -151,6 +154,7 @@ class MatchingEngine(Engine):
             side=order_schema.side,
             order_type=order_schema.type,
         )
+        LOGGER.info(f"creating new order {order_schema.model_dump()}")
         order = await self.order_service.create(data=order_schema)
 
         if not order:
