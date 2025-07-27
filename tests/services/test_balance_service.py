@@ -173,3 +173,28 @@ class TestBalanceService:
                 qty=balance.available + random.random(),
             )
             assert not afforded
+
+    async def test_pay_fee(
+        self, database_provider_test, balance_factory_for_portfolios
+    ):
+        balance_schemas = balance_factory_for_portfolios(portfolio_id=str(uuid.uuid4()))
+        balances = await self.balance_service.create_many(data=balance_schemas)
+
+        fee_portion = 0.001
+        for balance in balances:
+            paid = await self.balance_service.pay_fee(
+                portfolio_id=balance.portfolio_id,
+                asset=balance.asset,
+                paid_qty=balance.available * fee_portion,
+            )
+            assert paid
+
+            updated_balance = await self.balance_service.read_by_id(balance.id)
+            assert updated_balance is not None
+            assert round(
+                balance.quantity - updated_balance.quantity, ndigits=10
+            ) == round(balance.available * fee_portion, ndigits=10)
+            assert round(
+                balance.available - updated_balance.available, ndigits=10
+            ) == round(balance.available * fee_portion, ndigits=10)
+            assert updated_balance.fee_paid == balance.available * fee_portion
