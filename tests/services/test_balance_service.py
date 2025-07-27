@@ -1,5 +1,6 @@
 import pytest
 
+from src.models.balance import Balance
 from src.services import BalanceService
 from tests.materials import *
 
@@ -72,3 +73,38 @@ class TestBalanceService:
         assert round(got_balance.quantity - 0.443) == 0
         assert round(got_balance.available - 0.013) == 0
         assert round(got_balance.frozen - 0.43) == 0
+
+    async def test_unlock_balance(
+        self, database_provider_test, balance_factory_for_portfolios
+    ):
+        balance_schemas = balance_factory_for_portfolios(portfolio_id=str(uuid.uuid4()))
+        balances: List[Balance] = await self.balance_service.create_many(
+            data=balance_schemas
+        )
+
+        change_amount = 0.5
+        for balance in balances:
+            is_unlocked = await self.balance_service.unlock_balance(
+                portfolio_id=balance.portfolio_id,
+                asset=balance.asset,
+                unlocked_qty=balance.frozen * change_amount,
+            )
+
+            assert is_unlocked
+
+            updated_balance = await self.balance_service.read_by_id(id=balance.id)
+
+            assert updated_balance is not None
+            assert (
+                round(
+                    updated_balance.available
+                    - balance.available
+                    + (balance.frozen * change_amount),
+                )
+                == 0
+            )
+            assert (
+                round(updated_balance.frozen - (balance.frozen - (1 - change_amount)))
+                == 0
+            )
+            assert updated_balance.quantity == balance.quantity
