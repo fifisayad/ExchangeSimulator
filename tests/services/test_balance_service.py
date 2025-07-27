@@ -153,3 +153,23 @@ class TestBalanceService:
                 updated_balance.available - balance.available, ndigits=10
             ) == round(amount, ndigits=10)
             assert updated_balance.frozen == balance.frozen
+
+    async def test_check_qty(
+        self, database_provider_test, balance_factory_for_portfolios
+    ):
+        balance_schemas = balance_factory_for_portfolios(portfolio_id=str(uuid.uuid4()))
+        balances = await self.balance_service.create_many(data=balance_schemas)
+
+        for balance in balances:
+            afforded = await self.balance_service.check_available_qty(
+                portfolio_id=balance.portfolio_id,
+                asset=balance.asset,
+                qty=balance.available,
+            )
+            assert afforded
+            afforded = await self.balance_service.check_available_qty(
+                portfolio_id=balance.portfolio_id,
+                asset=balance.asset,
+                qty=balance.available + random.random(),
+            )
+            assert not afforded
