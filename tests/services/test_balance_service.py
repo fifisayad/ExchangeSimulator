@@ -95,16 +95,37 @@ class TestBalanceService:
             updated_balance = await self.balance_service.read_by_id(id=balance.id)
 
             assert updated_balance is not None
-            assert (
-                round(
-                    updated_balance.available
-                    - balance.available
-                    + (balance.frozen * change_amount),
-                )
-                == 0
-            )
-            assert (
-                round(updated_balance.frozen - (balance.frozen - (1 - change_amount)))
-                == 0
+            assert round(
+                updated_balance.available - balance.available, ndigits=10
+            ) == round(balance.frozen * change_amount, ndigits=10)
+            assert round(balance.frozen - updated_balance.frozen, ndigits=10) == round(
+                balance.frozen * change_amount, ndigits=10
             )
             assert updated_balance.quantity == balance.quantity
+
+    async def test_burn_balance(
+        self, database_provider_test, balance_factory_for_portfolios
+    ):
+        balance_schemas = balance_factory_for_portfolios(portfolio_id=str(uuid.uuid4()))
+        balances = await self.balance_service.create_many(data=balance_schemas)
+
+        burn_portion = 0.02
+        for balance in balances:
+            is_burned = await self.balance_service.burn_balance(
+                portfolio_id=balance.portfolio_id,
+                asset=balance.asset,
+                burned_qty=balance.frozen * burn_portion,
+            )
+
+            assert is_burned
+
+            updated_balance = await self.balance_service.read_by_id(balance.id)
+
+            assert updated_balance is not None
+            assert round(balance.frozen - updated_balance.frozen, ndigits=10) == round(
+                balance.frozen * burn_portion, ndigits=10
+            )
+            assert round(
+                balance.quantity - updated_balance.quantity, ndigits=10
+            ) == round(balance.frozen * burn_portion, ndigits=10)
+            assert updated_balance.burned == balance.frozen * burn_portion
