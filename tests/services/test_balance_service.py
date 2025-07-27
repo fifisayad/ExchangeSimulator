@@ -129,3 +129,27 @@ class TestBalanceService:
                 balance.quantity - updated_balance.quantity, ndigits=10
             ) == round(balance.frozen * burn_portion, ndigits=10)
             assert updated_balance.burned == balance.frozen * burn_portion
+
+    async def test_add_balance(
+        self, database_provider_test, balance_factory_for_portfolios
+    ):
+        balance_schemas = balance_factory_for_portfolios(portfolio_id=str(uuid.uuid4()))
+        balances = await self.balance_service.create_many(data=balance_schemas)
+
+        for balance in balances:
+            amount = random.random()
+            is_added = await self.balance_service.add_balance(
+                portfolio_id=balance.portfolio_id, asset=balance.asset, qty=amount
+            )
+            assert is_added
+
+            updated_balance = await self.balance_service.read_by_id(balance.id)
+
+            assert updated_balance is not None
+            assert round(
+                updated_balance.quantity - balance.quantity, ndigits=10
+            ) == round(amount, ndigits=10)
+            assert round(
+                updated_balance.available - balance.available, ndigits=10
+            ) == round(amount, ndigits=10)
+            assert updated_balance.frozen == balance.frozen
