@@ -50,7 +50,7 @@ class OrderService(Service):
             position_id (str): The ID of the associated position.
         """
         order.position_id = position_id
-        await self.repo.update_entity(order)
+        await self.update_entity(order)
 
     async def read_orders_by_portfolio_id(self, portfolio_id: str) -> List[Order]:
         return await self.repo.get_entities_by_portfolio_id(portfolio_id=portfolio_id)
