@@ -68,3 +68,17 @@ class TestOrderService:
 
         for order in got_orders:
             assert order.id in filled_perp_orders_id_set
+
+    async def test_set_position_id(self, database_provider_test, order_factory):
+        order_schemas: List[OrderSchema] = order_factory()
+        orders: List[Order] = await self.order_service.create_many(data=order_schemas)
+
+        position_id = str(uuid.uuid4())
+        for order in orders:
+            await self.order_service.set_position_id(order, position_id=position_id)
+
+        got_orders = await self.order_service.read_many_by_ids(
+            [order.id for order in orders]
+        )
+        for order in got_orders:
+            assert order.position_id == position_id
