@@ -1,3 +1,4 @@
+from uuid import uuid4
 from fifi.helpers.get_current_time import GetCurrentTime
 import pytest
 
@@ -82,3 +83,20 @@ class TestOrderService:
         )
         for order in got_orders:
             assert order.position_id == position_id
+
+    async def test_get_orders_by_portfolio_id(
+        self, database_provider_test, order_factory
+    ):
+        for i in range(5):
+            portfolio_id = str(uuid.uuid4())
+            count = 5
+            order_schemas = order_factory(portfolio_id=portfolio_id, count=count)
+            orders: List[Order] = await self.order_service.create_many(
+                data=order_schemas
+            )
+
+            got_orders = await self.order_service.read_orders_by_portfolio_id(
+                portfolio_id=portfolio_id
+            )
+            for i in range(count):
+                assert got_orders[i].to_dict() == orders[i].to_dict()
