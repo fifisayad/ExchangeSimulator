@@ -1,4 +1,3 @@
-from uuid import uuid4
 from fifi.helpers.get_current_time import GetCurrentTime
 import pytest
 
