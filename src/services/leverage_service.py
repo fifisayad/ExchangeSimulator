@@ -1,8 +1,7 @@
 from typing import Optional
-from fifi import GetLogger
+from fifi import GetLogger, BaseService
 
 
-from .service import Service
 from ..enums.market import Market
 from ..models import Leverage
 from ..repository import LeverageRepository
@@ -11,7 +10,7 @@ from ..schemas import LeverageSchema
 LOGGER = GetLogger().get()
 
 
-class LeverageService(Service):
+class LeverageService(BaseService):
     def __init__(self):
         self._repo = LeverageRepository()
 

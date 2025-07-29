@@ -1,12 +1,12 @@
 from typing import Optional
+from fifi import BaseService
 
 from ..schemas.portfolio_schema import PortfolioSchema
 from ..models import Portfolio
-from .service import Service
 from ..repository import PortfolioRepository
 
 
-class PortfolioService(Service):
+class PortfolioService(BaseService):
     def __init__(self) -> None:
         self._repo = PortfolioRepository()
 

@@ -59,7 +59,7 @@ class MatchingEngine(BaseEngine):
                     continue
 
     async def cancel_order(self, order_id: str) -> Order:
-        order = await self.order_service.read_by_id(id=order_id)
+        order = await self.order_service.read_by_id(id_=order_id)
         if not order:
             raise NotFoundOrder(f"{order_id=}")
 
@@ -151,7 +151,7 @@ class MatchingEngine(BaseEngine):
         side: OrderSide,
         order_type: OrderType,
     ) -> Order:
-        portfolio = await self.portfolio_service.read_by_id(id=portfolio_id)
+        portfolio = await self.portfolio_service.read_by_id(id_=portfolio_id)
         if not portfolio:
             LOGGER.error(f"{portfolio_id=} is invalid")
             raise InvalidOrder(f"{portfolio_id=} is invalid")

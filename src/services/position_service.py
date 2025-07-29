@@ -1,18 +1,17 @@
 from typing import Dict, List, Optional
-from fifi import GetLogger
+from fifi import GetLogger, BaseService
 
 from ..enums.position_side import PositionSide
 from ..enums.market import Market
 from ..enums.position_status import PositionStatus
 from ..models import Position
 from ..repository import PositionRepository
-from .service import Service
 
 
 LOGGER = GetLogger().get()
 
 
-class PositionService(Service):
+class PositionService(BaseService):
     """Service class responsible for managing trading positions, including creation,
     merging, partial and full closure, and liquidation. It coordinates with repositories
     and other services to persist changes and manage balance updates."""

@@ -1,11 +1,10 @@
 from typing import List, Optional
 
-from fifi import GetLogger
+from fifi import GetLogger, BaseService
 
 from src.models.balance import Balance
 from src.schemas.balance_schema import BalanceSchema
 
-from .service import Service
 from ..enums.asset import Asset
 from ..models import Order
 from ..repository import BalanceRepository
@@ -13,7 +12,7 @@ from ..repository import BalanceRepository
 LOGGER = GetLogger().get()
 
 
-class BalanceService(Service):
+class BalanceService(BaseService):
     """Service responsible for managing portfolio asset balances,
     including leverage retrieval, balance unlocking, burning, and updates
     related to trading activity."""

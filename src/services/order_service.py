@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
+from fifi import BaseService
 
-from .service import Service
 from ..enums.order_status import OrderStatus
 from ..repository import OrderRepository
 from ..models import Order
 
 
 # TODO: REFACTOR get orders with filter and make it flexible
-class OrderService(Service):
+class OrderService(BaseService):
     """Service class responsible for managing and processing orders,
     including retrieving active/filled orders, calculating fees, and
     associating orders with positions."""

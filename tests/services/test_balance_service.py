@@ -92,7 +92,7 @@ class TestBalanceService:
 
             assert is_unlocked
 
-            updated_balance = await self.balance_service.read_by_id(id=balance.id)
+            updated_balance = await self.balance_service.read_by_id(id_=balance.id)
 
             assert updated_balance is not None
             assert round(
