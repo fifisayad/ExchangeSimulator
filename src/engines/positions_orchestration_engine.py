@@ -1,4 +1,4 @@
-from fifi import GetLogger, singleton
+from fifi import GetLogger, singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 
 from src.enums.asset import Asset
@@ -15,14 +15,13 @@ from ..services import (
     MarketMonitoringService,
     PositionService,
 )
-from .engine import Engine
 
 
 LOGGER = GetLogger().get()
 
 
 @singleton
-class PositionsOrchestrationEngine(Engine):
+class PositionsOrchestrationEngine(BaseEngine):
     name: str = "positions_orchestration_engine"
 
     def __init__(self):

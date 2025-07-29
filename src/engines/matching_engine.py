@@ -1,5 +1,5 @@
 from typing import Optional
-from fifi import GetLogger, singleton
+from fifi import GetLogger, singleton, BaseEngine
 
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
 from ..enums.market import Market
@@ -12,13 +12,12 @@ from ..enums.order_status import OrderStatus
 from ..enums.order_type import OrderType
 from ..services import *
 from ..repository import *
-from .engine import Engine
 
 LOGGER = GetLogger().get()
 
 
 @singleton
-class MatchingEngine(Engine):
+class MatchingEngine(BaseEngine):
     name: str = "matching_engine"
 
     def __init__(self):
