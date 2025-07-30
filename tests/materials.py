@@ -113,7 +113,7 @@ def open_position_factory():
                     portfolio_id=str(uuid.uuid4()),
                     side=fake.enum(PositionSide),
                     entry_price=random.random(),
-                    status=PositionStatus.OPEN,
+                    status=fake.enum(PositionStatus),
                     margin=random.random(),
                     size=random.random(),
                     leverage=random.choice(leverages),
