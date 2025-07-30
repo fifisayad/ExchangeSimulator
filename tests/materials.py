@@ -102,6 +102,30 @@ def position_factory():
 
 
 @pytest.fixture
+def open_position_factory():
+    def create_positions(count: int = 5) -> List[PositionSchema]:
+        position_schemas = list()
+        leverages = [1, 2, 3, 4, 5]
+        for i in range(count):
+            position_schemas.append(
+                PositionSchema(
+                    market=fake.enum(Market),
+                    portfolio_id=str(uuid.uuid4()),
+                    side=fake.enum(PositionSide),
+                    entry_price=random.random(),
+                    status=PositionStatus.OPEN,
+                    margin=random.random(),
+                    size=random.random(),
+                    leverage=random.choice(leverages),
+                    lqd_price=random.random(),
+                )
+            )
+        return position_schemas
+
+    return create_positions
+
+
+@pytest.fixture
 def leverage_factory():
     def create_leverage(count: int = 5) -> List[LeverageSchema]:
         leverage_schemas = list()
