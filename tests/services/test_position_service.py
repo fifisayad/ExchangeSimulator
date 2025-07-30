@@ -153,3 +153,27 @@ class TestPositionService:
 
         for position in got_positions:
             assert position.id in positions_id_set
+
+    async def test_get_open_positions_hashmap(
+        self, database_provider_test, open_position_factory
+    ):
+        positions_schemas: List[PositionSchema] = open_position_factory(count=100)
+        positions = await self.position_service.create_many(data=positions_schemas)
+
+        open_positions_hash_map = dict()
+        for position in positions:
+            if position.status == PositionStatus.OPEN:
+                open_positions_hash_map[
+                    f"{position.market}_{position.portfolio_id}"
+                ] = position
+
+        LOGGER.info(f"{len(open_positions_hash_map)=}")
+        got_open_positions_hashmap = (
+            await self.position_service.get_open_positions_hashmap()
+        )
+        LOGGER.info(f"{len(got_open_positions_hashmap)=} by service")
+
+        assert len(open_positions_hash_map) == len(got_open_positions_hashmap)
+        for hash_id, open_position in got_open_positions_hashmap.items():
+            assert hash_id in open_positions_hash_map
+            assert open_position.to_dict() == open_positions_hash_map[hash_id].to_dict()
