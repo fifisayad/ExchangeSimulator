@@ -32,7 +32,9 @@ class PositionResponseSchema(BaseModel):
     side: PositionSide
     status: PositionStatus
     entry_price: float
+    close_price: float
     lqd_price: float
+    pnl: float
     size: float
     leverage: float
     margin: float
