@@ -1,6 +1,7 @@
 from typing import Optional
 from fifi import GetLogger, singleton, BaseEngine
 
+from ..enums.position_status import PositionStatus
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
 from ..enums.market import Market
 from ..helpers.order_helper import OrderHelper
@@ -122,10 +123,11 @@ class MatchingEngine(BaseEngine):
     async def perpetual_open_position_check(
         self, market: Market, portfolio_id: str, size: float, side: OrderSide
     ) -> bool:
-        open_position = await self.position_service.get_by_portfolio_and_market(
-            portfolio_id=portfolio_id, market=market
+        open_position = await self.position_service.get_positions(
+            portfolio_id=portfolio_id, market=market, status=PositionStatus.OPEN
         )
         if open_position:
+            open_position = open_position.pop()
             # there is an active position
             if PositionHelpers().is_order_against_position(
                 order_side=side, position_side=open_position.side
