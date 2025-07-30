@@ -1,7 +1,4 @@
-from copy import deepcopy
 from enum import Enum
-from .asset import Asset
-from .order_side import OrderSide
 
 
 class Market(Enum):
