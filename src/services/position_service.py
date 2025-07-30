@@ -57,10 +57,3 @@ class PositionService(BaseService):
         for position in open_positions:
             positions[f"{position.market}_{position.portfolio_id}"] = position
         return positions
-
-    async def get_by_portfolio_and_market(
-        self, portfolio_id: str, market: Market
-    ) -> Optional[Position]:
-        return await self._repo.get_by_portfolio_and_market(
-            portfolio_id=portfolio_id, market=market
-        )
