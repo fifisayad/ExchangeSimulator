@@ -40,6 +40,7 @@ class OrderResponseSchema(BaseModel):
     status: OrderStatus
     side: OrderSide
     type: OrderType
+    position_id: str
 
 
 class OrderReadSchema(BaseModel):
