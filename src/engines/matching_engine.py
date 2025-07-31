@@ -85,6 +85,7 @@ class MatchingEngine(BaseEngine):
         return order
 
     async def fill_order(self, order: Order) -> None:
+        LOGGER.info(f"fill {order.id=}")
         order.status = OrderStatus.FILLED
         recieved_asset = OrderHelper.get_recieved_asset(
             market=order.market, side=order.side
@@ -104,6 +105,12 @@ class MatchingEngine(BaseEngine):
                 portfolio_id=order.portfolio_id,
                 asset=payment_asset,
                 unlocked_qty=payment_total,
+            )
+
+            await self.balance_service.pay_balance(
+                portfolio_id=order.portfolio_id,
+                asset=payment_asset,
+                paid_qty=payment_total,
             )
 
             await self.balance_service.add_balance(
