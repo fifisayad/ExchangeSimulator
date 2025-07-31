@@ -64,8 +64,8 @@ class MatchingEngine(BaseEngine):
         if not order:
             raise NotFoundOrder(f"{order_id=}")
 
-        if order.status == OrderStatus.FILLED:
-            raise InvalidOrder(f"this {order_id=} is filled!!!")
+        if order.status != OrderStatus.ACTIVE:
+            raise InvalidOrder(f"this {order_id=} is {order.status}!!!")
         order.status = OrderStatus.CANCELED
 
         payment_asset = OrderHelper.get_payment_asset(
