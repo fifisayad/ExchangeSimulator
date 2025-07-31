@@ -68,13 +68,13 @@ async def create_order(
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@order_router.patch("", response_model=OrderResponseSchema)
+@order_router.patch("/cancel", response_model=OrderResponseSchema)
 async def cancel_order(
-    order_cancel_schema: OrderCancelSchema,
+    order_id: str,
     matching_engine: MatchingEngine = Depends(get_matching_engine),
 ):
     try:
-        return await matching_engine.cancel_order(order_id=order_cancel_schema.id)
+        return await matching_engine.cancel_order(order_id=order_id)
     except InvalidOrder as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:

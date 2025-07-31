@@ -26,10 +26,6 @@ class OrderCreateSchema(BaseModel):
     type: OrderType
 
 
-class OrderCancelSchema(BaseModel):
-    id: str
-
-
 class OrderResponseSchema(BaseModel):
     id: str
     portfolio_id: str
