@@ -26,7 +26,7 @@ async def get_portfolio(
     portfolio_service: PortfolioService = Depends(get_portfolio_service),
 ):
     if id:
-        portfolio = await portfolio_service.read_by_id(id=id)
+        portfolio = await portfolio_service.read_by_id(id_=id)
         if portfolio:
             return portfolio
     if name:

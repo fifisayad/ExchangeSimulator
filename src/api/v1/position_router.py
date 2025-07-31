@@ -29,7 +29,7 @@ async def get_position(
 ):
     position = None
     if position_query.id:
-        position = await position_service.read_by_id(id=position_query.id)
+        position = await position_service.read_by_id(id_=position_query.id)
     elif position_query.portfolio_id:
         position = await position_service.get_positions(
             portfolio_id=position_query.portfolio_id,

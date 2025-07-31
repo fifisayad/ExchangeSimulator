@@ -34,7 +34,7 @@ async def get_order(
 ):
     order = None
     if order_query.id:
-        order = await order_service.read_by_id(id=order_query.id)
+        order = await order_service.read_by_id(id_=order_query.id)
     elif order_query.portfolio_id:
         order = await order_service.read_orders_by_portfolio_id(
             portfolio_id=order_query.portfolio_id
