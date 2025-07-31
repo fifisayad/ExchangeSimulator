@@ -5,9 +5,7 @@ from contextlib import asynccontextmanager
 from ...common.exceptions import InvalidOrder
 from ...engines.matching_engine import MatchingEngine
 from ...schemas.order_schema import (
-    OrderCancelSchema,
     OrderCreateSchema,
-    OrderReadSchema,
     OrderResponseSchema,
 )
 from .deps import get_order_service, get_matching_engine
