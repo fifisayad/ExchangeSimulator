@@ -17,14 +17,6 @@ class PositionSchema(BaseModel):
     margin: float = 0
 
 
-class PositionReadSchema(BaseModel):
-    id: str | None = None
-    portfolio_id: str | None = None
-    market: Market | None = None
-    side: PositionSide | None = None
-    status: PositionStatus | None = None
-
-
 class PositionResponseSchema(BaseModel):
     id: str
     portfolio_id: str
