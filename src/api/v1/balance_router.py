@@ -29,7 +29,7 @@ async def get_balance(
     balance_service: BalanceService = Depends(get_balance_service),
 ):
     if balance_query.id:
-        balance = await balance_service.read_by_id(id=balance_query.id)
+        balance = await balance_service.read_by_id(id_=balance_query.id)
         if balance:
             return balance
     if balance_query.portfolio_id:
@@ -59,7 +59,7 @@ async def deposit_balance(
             portfolio_id=balance_dposit.portfolio_id, asset=balance_dposit.asset
         )
     else:
-        portfolio = await portfolio_service.read_by_id(id=balance_dposit.portfolio_id)
+        portfolio = await portfolio_service.read_by_id(id_=balance_dposit.portfolio_id)
         if portfolio:
             return await balance_service.create_by_qty(
                 portfolio_id=balance_dposit.portfolio_id,
