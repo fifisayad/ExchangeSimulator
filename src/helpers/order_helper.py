@@ -11,8 +11,8 @@ class OrderHelper:
         if market.is_perptual():
             return Asset.USD
         market_coins = market.value.replace("_prep", "")
-        first_coin = market_coins[:3]
-        second_coin = market_coins[3:]
+        second_coin = market_coins[:3]
+        first_coin = market_coins[3:]
         if side == OrderSide.BUY:
             return Asset[second_coin.upper()]
         else:
@@ -23,8 +23,8 @@ class OrderHelper:
         if market.is_perptual():
             return Asset.USD
         market_coins = market.value.replace("_prep", "")
-        first_coin = market_coins[:3]
-        second_coin = market_coins[3:]
+        second_coin = market_coins[:3]
+        first_coin = market_coins[3:]
         if side == OrderSide.BUY:
             return Asset[first_coin.upper()]
         else:
