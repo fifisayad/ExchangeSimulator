@@ -11,12 +11,6 @@ class BalanceSchema(BaseModel):
     frozen: float
 
 
-class BalanceReadSchema(BaseModel):
-    portfolio_id: str
-    id: str | None = None
-    asset: Asset | None = None
-
-
 class BalanceDepositSchema(BaseModel):
     portfolio_id: str
     asset: Asset
