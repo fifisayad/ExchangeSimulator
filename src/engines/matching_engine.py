@@ -85,6 +85,9 @@ class MatchingEngine(BaseEngine):
         return order
 
     async def fill_order(self, order: Order) -> None:
+        if order.status != OrderStatus.ACTIVE:
+            LOGGER.info(f"can not fill this {order.id=} {order.status=}")
+            return
         LOGGER.info(f"fill {order.id=}")
         order.status = OrderStatus.FILLED
         recieved_asset = OrderHelper.get_recieved_asset(
