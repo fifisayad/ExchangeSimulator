@@ -2,9 +2,10 @@ from typing import List, Union
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
+from src.enums.asset import Asset
+
 from ...schemas.balance_schema import (
     BalanceDepositSchema,
-    BalanceReadSchema,
     BalanceResponseSchema,
 )
 from .deps import get_balance_service, get_portfolio_service
@@ -25,20 +26,22 @@ balance_router = APIRouter(prefix="/balance", tags=["Balance"], lifespan=lifespa
     "", response_model=Union[BalanceResponseSchema, List[BalanceResponseSchema]]
 )
 async def get_balance(
-    balance_query: BalanceReadSchema,
+    asset_id: None | str = None,
+    portfolio_id: None | str = None,
+    asset: None | Asset = None,
     balance_service: BalanceService = Depends(get_balance_service),
 ):
-    if balance_query.id:
-        balance = await balance_service.read_by_id(id_=balance_query.id)
+    if asset_id:
+        balance = await balance_service.read_by_id(id_=asset_id)
         if balance:
             return balance
-    if balance_query.portfolio_id:
-        if balance_query.asset:
+    if portfolio_id:
+        if asset:
             return await balance_service.read_by_asset(
-                portfolio_id=balance_query.portfolio_id, asset=balance_query.asset
+                portfolio_id=portfolio_id, asset=asset
             )
         return await balance_service.read_many_by_portfolio_id(
-            portfolio_id=balance_query.portfolio_id
+            portfolio_id=portfolio_id
         )
     raise HTTPException(status_code=404, detail="balance not found")
 
