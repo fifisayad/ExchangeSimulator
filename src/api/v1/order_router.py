@@ -29,15 +29,16 @@ order_router = APIRouter(prefix="/order", tags=["Order"], lifespan=lifespan)
     "", response_model=Union[OrderResponseSchema, List[OrderResponseSchema]]
 )
 async def get_order(
-    order_query: OrderReadSchema,
+    order_id: str | None = None,
+    portfolio_id: str | None = None,
     order_service: OrderService = Depends(get_order_service),
 ):
     order = None
-    if order_query.id:
-        order = await order_service.read_by_id(id_=order_query.id)
-    elif order_query.portfolio_id:
+    if order_id:
+        order = await order_service.read_by_id(id_=order_id)
+    elif portfolio_id:
         order = await order_service.read_orders_by_portfolio_id(
-            portfolio_id=order_query.portfolio_id
+            portfolio_id=portfolio_id
         )
     else:
         raise HTTPException(

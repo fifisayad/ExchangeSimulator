@@ -37,8 +37,3 @@ class OrderResponseSchema(BaseModel):
     side: OrderSide
     type: OrderType
     position_id: str
-
-
-class OrderReadSchema(BaseModel):
-    id: str | None = None
-    portfolio_id: str | None = None
