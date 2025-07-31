@@ -222,3 +222,18 @@ class TestMatchingEngine:
     async def test_cancel_order_not_found(self, database_provider_test):
         with pytest.raises(NotFoundOrder):
             await self.matching_engine.cancel_order(order_id="iampoor")
+
+    async def test_cancel_filled_order(self, database_provider_test):
+        order_schema = OrderSchema(
+            portfolio_id="iamrich",
+            market=Market.BTCUSD_PERP,
+            price=1000,
+            size=0.25,
+            side=OrderSide.BUY,
+            fee=50,
+            type=OrderType.LIMIT,
+            status=OrderStatus.FILLED,
+        )
+        order = await self.order_service.create(data=order_schema)
+        with pytest.raises(InvalidOrder):
+            await self.matching_engine.cancel_order(order_id=order.id)
