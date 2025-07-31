@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
-from ...schemas.leverage_schema import LeverageSchema, LeverageReadSchema
+from ...schemas.leverage_schema import LeverageSchema
 from .deps import get_leverage_service
 from ...services import LeverageService
+from ...enums.market import Market
 
 
 @asynccontextmanager
@@ -18,11 +19,12 @@ leverage_router = APIRouter(prefix="/leverage", tags=["Leverage"], lifespan=life
 
 @leverage_router.get("", response_model=LeverageSchema)
 async def get_leverage(
-    leverage_query: LeverageReadSchema,
+    portfolio_id: str,
+    market: Market,
     leverage_service: LeverageService = Depends(get_leverage_service),
 ):
     leverage = await leverage_service.get_portfolio_market_leverage(
-        portfolio_id=leverage_query.portfolio_id, market=leverage_query.market
+        portfolio_id=portfolio_id, market=market
     )
     if leverage:
         return leverage
