@@ -16,6 +16,8 @@ async def lifespan(app: FastAPI):
     await PositionsOrchestrationEngine().start()
     yield
     # cleanup
+    await MatchingEngine().stop()
+    await PositionsOrchestrationEngine().stop()
 
 
 base_router = APIRouter(
