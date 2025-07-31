@@ -1,6 +1,6 @@
 import pytest
 
-from src.common.exceptions import InvalidOrder
+from src.common.exceptions import InvalidOrder, NotFoundOrder
 from src.engines.matching_engine import MatchingEngine
 from src.enums.order_type import OrderType
 from src.schemas.position_schema import PositionSchema
@@ -218,3 +218,7 @@ class TestMatchingEngine:
         )
         assert usd_balance is not None
         assert usd_balance.available == 1950
+
+    async def test_cancel_order_not_found(self, database_provider_test):
+        with pytest.raises(NotFoundOrder):
+            await self.matching_engine.cancel_order(order_id="iampoor")
