@@ -1,10 +1,18 @@
 import pytest
+from unittest.mock import call, patch, Mock
 
 from src.common.exceptions import InvalidOrder, NotFoundOrder
 from src.engines.matching_engine import MatchingEngine
 from src.enums.order_type import OrderType
+from src.models.portfolio import Portfolio
 from src.schemas.position_schema import PositionSchema
-from src.services import PositionService, OrderService, BalanceService
+from src.services import (
+    PositionService,
+    OrderService,
+    BalanceService,
+    MarketMonitoringService,
+    PortfolioService,
+)
 from tests.materials import *
 
 
@@ -16,9 +24,13 @@ class TestMatchingEngine:
     position_service = PositionService()
     order_service = OrderService()
     balance_service = BalanceService()
+    portfolio_service = PortfolioService()
     matching_engine = MatchingEngine()
 
-    async def test_perpetual_open_position_check(self, database_provider_test):
+    async def test_perpetual_open_position_check(
+        self,
+        database_provider_test,
+    ):
         checked = await self.matching_engine.perpetual_open_position_check(
             market=Market.BTCUSD_PERP,
             portfolio_id="iamrich",
@@ -76,16 +88,19 @@ class TestMatchingEngine:
                 size=0.134,
             )
 
-    async def create_portfolio(self):
+    async def create_fake_balances(self, portfolio_id: str = "iamrich"):
         await self.balance_service.create_by_qty(
-            portfolio_id="iamrich", asset=Asset.BTC, qty=0.005
+            portfolio_id=portfolio_id, asset=Asset.BTC, qty=0.005
         )
         await self.balance_service.create_by_qty(
-            portfolio_id="iamrich", asset=Asset.USD, qty=2000
+            portfolio_id=portfolio_id, asset=Asset.USD, qty=2000
         )
 
-    async def test_fill_order_sucess_story(self, database_provider_test):
-        await self.create_portfolio()
+    async def test_fill_order_sucess_story(
+        self,
+        database_provider_test,
+    ):
+        await self.create_fake_balances()
         await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
@@ -118,8 +133,11 @@ class TestMatchingEngine:
         assert usd_balance is not None
         assert usd_balance.available == 1700
 
-    async def test_fill_order_perpetual_story(self, database_provider_test):
-        await self.create_portfolio()
+    async def test_fill_order_perpetual_story(
+        self,
+        database_provider_test,
+    ):
+        await self.create_fake_balances()
         await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
@@ -153,8 +171,11 @@ class TestMatchingEngine:
         assert usd_balance.available == 1650
         assert usd_balance.fee_paid == 50
 
-    async def test_fill_order_or_filled(self, database_provider_test):
-        await self.create_portfolio()
+    async def test_fill_order_or_filled(
+        self,
+        database_provider_test,
+    ):
+        await self.create_fake_balances()
         order_schema = OrderSchema(
             portfolio_id="iamrich",
             market=Market.BTCUSD_PERP,
@@ -184,8 +205,11 @@ class TestMatchingEngine:
         assert usd_balance is not None
         assert usd_balance.available == 2000
 
-    async def test_cancel_order_sucess_story(self, database_provider_test):
-        await self.create_portfolio()
+    async def test_cancel_order_sucess_story(
+        self,
+        database_provider_test,
+    ):
+        await self.create_fake_balances()
         await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
@@ -219,11 +243,17 @@ class TestMatchingEngine:
         assert usd_balance is not None
         assert usd_balance.available == 1950
 
-    async def test_cancel_order_not_found(self, database_provider_test):
+    async def test_cancel_order_not_found(
+        self,
+        database_provider_test,
+    ):
         with pytest.raises(NotFoundOrder):
             await self.matching_engine.cancel_order(order_id="iampoor")
 
-    async def test_cancel_filled_order(self, database_provider_test):
+    async def test_cancel_filled_order(
+        self,
+        database_provider_test,
+    ):
         order_schema = OrderSchema(
             portfolio_id="iamrich",
             market=Market.BTCUSD_PERP,
@@ -238,7 +268,10 @@ class TestMatchingEngine:
         with pytest.raises(InvalidOrder):
             await self.matching_engine.cancel_order(order_id=order.id)
 
-    async def test_cancel_canceled_order(self, database_provider_test):
+    async def test_cancel_canceled_order(
+        self,
+        database_provider_test,
+    ):
         order_schema = OrderSchema(
             portfolio_id="iamrich",
             market=Market.BTCUSD_PERP,
@@ -253,7 +286,10 @@ class TestMatchingEngine:
         with pytest.raises(InvalidOrder):
             await self.matching_engine.cancel_order(order_id=order.id)
 
-    async def test_create_order_wrong_portfolio_id(self, database_provider_test):
+    async def test_create_order_wrong_portfolio_id(
+        self,
+        database_provider_test,
+    ):
         with pytest.raises(InvalidOrder):
             await self.matching_engine.create_order(
                 market=Market.BTCUSD,
@@ -263,3 +299,45 @@ class TestMatchingEngine:
                 side=OrderSide.BUY,
                 order_type=OrderType.LIMIT,
             )
+
+    async def create_fake_portfolio(self) -> Portfolio:
+        return await self.portfolio_service.create(
+            data=PortfolioSchema(name="CrazyTrader")
+        )
+
+    async def test_create_spot_market_order(
+        self,
+        database_provider_test,
+    ):
+        with patch.object(
+            self.matching_engine.mm_service, "get_last_trade", return_value=1100
+        ) as mock_trade:
+            portfolio = await self.create_fake_portfolio()
+            await self.create_fake_balances(portfolio_id=portfolio.id)
+            order = await self.matching_engine.create_order(
+                portfolio_id=portfolio.id,
+                market=Market.BTCUSD,
+                price=1000,
+                size=0.25,
+                side=OrderSide.BUY,
+                order_type=OrderType.MARKET,
+            )
+            LOGGER.info(f"recieved order: {order.to_dict()}")
+            mock_trade.assert_called_once_with(market=Market.BTCUSD)
+
+        assert order.price == 1100
+        assert order.status == OrderStatus.FILLED
+        assert order.fee != 0
+
+        btc_balance = await self.balance_service.read_by_asset(
+            portfolio_id=portfolio.id, asset=Asset.BTC
+        )
+        assert btc_balance is not None
+        assert btc_balance.available == 0.005 + 0.25 - order.fee
+        assert btc_balance.fee_paid == order.fee
+
+        usd_balance = await self.balance_service.read_by_asset(
+            portfolio_id=portfolio.id, asset=Asset.USD
+        )
+        assert usd_balance is not None
+        assert usd_balance.available == 2000 - order.price * order.size
