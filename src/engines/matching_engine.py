@@ -84,7 +84,7 @@ class MatchingEngine(BaseEngine):
         await self.order_service.update_entity(order)
         return order
 
-    async def fill_order(self, order: Order) -> None:
+    async def fill_order(self, order: Order) -> Order:
         if order.status != OrderStatus.ACTIVE:
             LOGGER.info(f"can not fill this {order.id=} {order.status=}")
             return
@@ -129,6 +129,7 @@ class MatchingEngine(BaseEngine):
             paid_qty=order.fee,
         )
         await self.order_service.update_entity(order)
+        return order
 
     async def perpetual_open_position_check(
         self, market: Market, portfolio_id: str, size: float, side: OrderSide
@@ -175,6 +176,7 @@ class MatchingEngine(BaseEngine):
             size=size,
             fee=0,
             side=side,
+            type=order_type,
         )
 
         if order_type == OrderType.MARKET:
@@ -211,12 +213,11 @@ class MatchingEngine(BaseEngine):
                 raise NotEnoughBalance(er_msg)
 
         if checked_available_qty:
-            if order_schema.type == OrderType.LIMIT:
-                await self.balance_service.lock_balance(
-                    portfolio_id=portfolio_id,
-                    asset=payment_asset,
-                    locked_qty=payment_total,
-                )
+            await self.balance_service.lock_balance(
+                portfolio_id=portfolio_id,
+                asset=payment_asset,
+                locked_qty=payment_total,
+            )
 
         order_schema.fee = OrderHelper.fee_calc(
             portfolio=portfolio,
@@ -235,6 +236,6 @@ class MatchingEngine(BaseEngine):
             )
 
         if order.type == OrderType.MARKET:
-            await self.fill_order(order)
+            return await self.fill_order(order)
 
         return order
