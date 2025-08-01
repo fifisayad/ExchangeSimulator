@@ -252,3 +252,14 @@ class TestMatchingEngine:
         order = await self.order_service.create(data=order_schema)
         with pytest.raises(InvalidOrder):
             await self.matching_engine.cancel_order(order_id=order.id)
+
+    async def test_create_order_wrong_portfolio_id(self, database_provider_test):
+        with pytest.raises(InvalidOrder):
+            await self.matching_engine.create_order(
+                market=Market.BTCUSD,
+                portfolio_id="ThisShitIsImpossible",
+                price=1234324,
+                size=342234,
+                side=OrderSide.BUY,
+                order_type=OrderType.LIMIT,
+            )
