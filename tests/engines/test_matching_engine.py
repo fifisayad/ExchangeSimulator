@@ -424,3 +424,48 @@ class TestMatchingEngine:
         assert usd_balance is not None
         assert usd_balance.available == 2000 - order.price * order.size
         assert usd_balance.frozen == order.price * order.size
+
+    async def test_create_perp_limit_order(
+        self,
+        database_provider_test,
+    ):
+        with patch.object(
+            self.matching_engine.mm_service, "get_last_trade", return_value=1100
+        ) as mock_trade:
+            portfolio = await self.create_fake_portfolio()
+            leverage = await self.leverage_service.create_or_update_leverage(
+                portfolio_id=portfolio.id, market=Market.BTCUSD_PERP, leverage=3
+            )
+            assert leverage is not None
+            await self.create_fake_balances(portfolio_id=portfolio.id)
+            order = await self.matching_engine.create_order(
+                portfolio_id=portfolio.id,
+                market=Market.BTCUSD_PERP,
+                price=1000,
+                size=0.25,
+                side=OrderSide.BUY,
+                order_type=OrderType.LIMIT,
+            )
+            mock_trade.assert_not_called()
+
+        assert order.price == 1000
+        assert order.status == OrderStatus.ACTIVE
+        assert order.fee != 0
+
+        btc_balance = await self.balance_service.read_by_asset(
+            portfolio_id=portfolio.id, asset=Asset.BTC
+        )
+        assert btc_balance is not None
+        assert btc_balance.available == 0.005
+        assert btc_balance.fee_paid == 0
+
+        usd_balance = await self.balance_service.read_by_asset(
+            portfolio_id=portfolio.id, asset=Asset.USD
+        )
+        assert usd_balance is not None
+        assert usd_balance.available == 2000 - (
+            order.price * order.size / leverage.leverage
+        )
+        assert usd_balance.quantity == 2000
+        assert usd_balance.frozen == (order.price * order.size / leverage.leverage)
+        assert usd_balance.fee_paid == 0
