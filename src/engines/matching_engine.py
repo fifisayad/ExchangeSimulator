@@ -28,6 +28,7 @@ class MatchingEngine(BaseEngine):
         self.balance_service = BalanceService()
         self.order_service = OrderService()
         self.position_service = PositionService()
+        self.leverage_service = LeverageService()
 
     async def preprocess(self):
         pass
@@ -184,21 +185,27 @@ class MatchingEngine(BaseEngine):
 
         payment_asset = OrderHelper.get_payment_asset(market=market, side=side)
         checked_open_position = False
+        leverage = 1
         if market.is_perptual():
-            payment_total = order_schema.price * order_schema.size
+            leverage = (
+                await self.leverage_service.get_portfolio_market_leverage_value(
+                    portfolio_id=order_schema.portfolio_id, market=order_schema.market
+                )
+                or leverage
+            )
             checked_open_position = await self.perpetual_open_position_check(
                 market=order_schema.market,
                 portfolio_id=order_schema.portfolio_id,
                 size=order_schema.size,
                 side=order_schema.side,
             )
-        else:
-            payment_total = OrderHelper.get_order_payment_asset_total(
-                market=order_schema.market,
-                price=order_schema.price,
-                side=order_schema.side,
-                size=order_schema.size,
-            )
+        payment_total = OrderHelper.get_order_payment_asset_total(
+            market=order_schema.market,
+            price=order_schema.price,
+            side=order_schema.side,
+            size=order_schema.size,
+            leverage=leverage,
+        )
 
         checked_available_qty = False
         if not (checked_open_position):
