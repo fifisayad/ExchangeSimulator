@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from fifi import GetLogger, singleton, BaseEngine
 
 from ..enums.position_status import PositionStatus
@@ -45,20 +45,19 @@ class MatchingEngine(BaseEngine):
             if not open_orders:
                 continue
 
-            trades = self.mm_service.get_last_trade()
-            for order in open_orders:
-                if order.type == OrderType.MARKET:
-                    continue
-                elif (
-                    order.side == OrderSide.BUY and order.price >= trades[order.market]
-                ):
-                    await self.fill_order(order)
-                elif (
-                    order.side == OrderSide.SELL and order.price <= trades[order.market]
-                ):
-                    await self.fill_order(order)
-                else:
-                    continue
+            await self.match_open_orders(open_orders=open_orders)
+
+    async def match_open_orders(self, open_orders: List[Order]):
+        trades = self.mm_service.get_last_trade()
+        for order in open_orders:
+            if order.type == OrderType.MARKET:
+                continue
+            elif order.side == OrderSide.BUY and order.price >= trades[order.market]:
+                await self.fill_order(order)
+            elif order.side == OrderSide.SELL and order.price <= trades[order.market]:
+                await self.fill_order(order)
+            else:
+                continue
 
     async def cancel_order(self, order_id: str) -> Order:
         order = await self.order_service.read_by_id(id_=order_id)
