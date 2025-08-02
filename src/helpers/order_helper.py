@@ -1,3 +1,4 @@
+from typing import Optional
 from ..models import Portfolio
 from ..enums.order_type import OrderType
 from ..enums.order_side import OrderSide
@@ -71,10 +72,12 @@ class OrderHelper:
         price: float,
         size: float,
         side: OrderSide,
+        leverage: float = 1,
     ) -> float:
         order_total = size * price
         if market.is_perptual():
-            return order_total
+            if leverage:
+                return order_total / leverage
         if side == OrderSide.BUY:
             return order_total
         else:
