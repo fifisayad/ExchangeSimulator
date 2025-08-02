@@ -4,6 +4,7 @@ from unittest.mock import patch
 from src.common.exceptions import InvalidOrder, NotFoundOrder
 from src.engines.matching_engine import MatchingEngine
 from src.enums.order_type import OrderType
+from src.models.order import Order
 from src.models.portfolio import Portfolio
 from src.schemas.position_schema import PositionSchema
 from src.services import (
@@ -91,7 +92,7 @@ class TestMatchingEngine:
 
     async def create_fake_balances(self, portfolio_id: str = "iamrich"):
         await self.balance_service.create_by_qty(
-            portfolio_id=portfolio_id, asset=Asset.BTC, qty=0.005
+            portfolio_id=portfolio_id, asset=Asset.BTC, qty=0.05
         )
         await self.balance_service.create_by_qty(
             portfolio_id=portfolio_id, asset=Asset.USD, qty=2000
@@ -126,7 +127,7 @@ class TestMatchingEngine:
             portfolio_id="iamrich", asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005 + 0.25 - 0.00045
+        assert btc_balance.available == 0.05 + 0.25 - 0.00045
 
         usd_balance = await self.balance_service.read_by_asset(
             portfolio_id="iamrich", asset=Asset.USD
@@ -163,7 +164,7 @@ class TestMatchingEngine:
             portfolio_id="iamrich", asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005
+        assert btc_balance.available == 0.05
 
         usd_balance = await self.balance_service.read_by_asset(
             portfolio_id="iamrich", asset=Asset.USD
@@ -198,7 +199,7 @@ class TestMatchingEngine:
             portfolio_id="iamrich", asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005
+        assert btc_balance.available == 0.05
 
         usd_balance = await self.balance_service.read_by_asset(
             portfolio_id="iamrich", asset=Asset.USD
@@ -236,7 +237,7 @@ class TestMatchingEngine:
             portfolio_id="iamrich", asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005
+        assert btc_balance.available == 0.05
 
         usd_balance = await self.balance_service.read_by_asset(
             portfolio_id="iamrich", asset=Asset.USD
@@ -333,7 +334,7 @@ class TestMatchingEngine:
             portfolio_id=portfolio.id, asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005 + 0.25 - order.fee
+        assert btc_balance.available == 0.05 + 0.25 - order.fee
         assert btc_balance.fee_paid == order.fee
 
         usd_balance = await self.balance_service.read_by_asset(
@@ -373,7 +374,7 @@ class TestMatchingEngine:
             portfolio_id=portfolio.id, asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005
+        assert btc_balance.available == 0.05
         assert btc_balance.fee_paid == 0
 
         usd_balance = await self.balance_service.read_by_asset(
@@ -415,7 +416,7 @@ class TestMatchingEngine:
             portfolio_id=portfolio.id, asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005
+        assert btc_balance.available == 0.05
         assert btc_balance.fee_paid == 0
 
         usd_balance = await self.balance_service.read_by_asset(
@@ -456,7 +457,7 @@ class TestMatchingEngine:
             portfolio_id=portfolio.id, asset=Asset.BTC
         )
         assert btc_balance is not None
-        assert btc_balance.available == 0.005
+        assert btc_balance.available == 0.05
         assert btc_balance.fee_paid == 0
 
         usd_balance = await self.balance_service.read_by_asset(
@@ -469,3 +470,41 @@ class TestMatchingEngine:
         assert usd_balance.quantity == 2000
         assert usd_balance.frozen == (order.price * order.size / leverage.leverage)
         assert usd_balance.fee_paid == 0
+
+    async def test_match_open_orders(
+        self,
+        database_provider_test,
+    ):
+        open_orders: List[Order] = list()
+        portfolio = await self.create_fake_portfolio()
+        await self.create_fake_balances(portfolio_id=portfolio.id)
+        for price in [1000, 1200]:
+            for side in [OrderSide.BUY, OrderSide.SELL]:
+                open_orders.append(
+                    await self.matching_engine.create_order(
+                        portfolio_id=portfolio.id,
+                        market=Market.BTCUSD,
+                        price=price,
+                        size=0.0025,
+                        side=side,
+                        order_type=OrderType.LIMIT,
+                    )
+                )
+        with patch.object(
+            self.matching_engine.mm_service,
+            "get_last_trade",
+            return_value={Market.BTCUSD: 1100},
+        ) as mock_trade:
+            await self.matching_engine.match_open_orders(open_orders=open_orders)
+            assert mock_trade.call_count == 1
+
+            open_orders = await self.order_service.get_open_orders()
+            assert len(open_orders) == 2
+
+            for order in open_orders:
+                if order.side == OrderSide.BUY:
+                    LOGGER.info(f"buy order={order.to_dict()}")
+                    assert order.price == 1000
+                if order.side == OrderSide.SELL:
+                    LOGGER.info(f"sell order={order.to_dict()}")
+                    assert order.price == 1200
