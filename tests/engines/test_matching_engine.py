@@ -11,6 +11,7 @@ from src.services import (
     OrderService,
     BalanceService,
     PortfolioService,
+    LeverageService,
 )
 from tests.materials import *
 
@@ -25,6 +26,7 @@ class TestMatchingEngine:
     balance_service = BalanceService()
     portfolio_service = PortfolioService()
     matching_engine = MatchingEngine()
+    leverage_service = LeverageService()
 
     async def test_perpetual_open_position_check(
         self,
@@ -348,6 +350,10 @@ class TestMatchingEngine:
             self.matching_engine.mm_service, "get_last_trade", return_value=1100
         ) as mock_trade:
             portfolio = await self.create_fake_portfolio()
+            leverage = await self.leverage_service.create_or_update_leverage(
+                portfolio_id=portfolio.id, market=Market.BTCUSD_PERP, leverage=2
+            )
+            assert leverage is not None
             await self.create_fake_balances(portfolio_id=portfolio.id)
             order = await self.matching_engine.create_order(
                 portfolio_id=portfolio.id,
@@ -374,7 +380,10 @@ class TestMatchingEngine:
             portfolio_id=portfolio.id, asset=Asset.USD
         )
         assert usd_balance is not None
-        assert usd_balance.available == 2000 - order.price * order.size - order.fee
+        assert (
+            usd_balance.available
+            == 2000 - (order.price * order.size / leverage.leverage) - order.fee
+        )
         assert usd_balance.quantity == 2000 - order.fee
-        assert usd_balance.frozen == order.price * order.size
+        assert usd_balance.frozen == (order.price * order.size / leverage.leverage)
         assert usd_balance.fee_paid == order.fee
