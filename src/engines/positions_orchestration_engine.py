@@ -129,7 +129,7 @@ class PositionsOrchestrationEngine(BaseEngine):
         position.pnl += PositionHelpers.pnl_value(
             entry_price=position.entry_price,
             close_price=order.price,
-            size=position.size,
+            size=order.size,
             side=position.side,
         )
 
@@ -173,7 +173,7 @@ class PositionsOrchestrationEngine(BaseEngine):
         position.pnl += PositionHelpers.pnl_value(
             entry_price=position.entry_price,
             close_price=order.price,
-            size=position.size,
+            size=order.size,
             side=position.side,
         )
         position.status = PositionStatus.CLOSE
