@@ -1,4 +1,5 @@
 from typing import Tuple
+from fifi import GetLogger
 import pytest
 
 from src.enums.asset import Asset
@@ -15,6 +16,8 @@ from src.schemas.order_schema import OrderSchema
 from src.schemas.position_schema import PositionSchema
 from src.services import *
 from src.engines.positions_orchestration_engine import PositionsOrchestrationEngine
+
+LOGGER = GetLogger().get()
 
 
 @pytest.mark.asyncio
@@ -97,3 +100,45 @@ class TestPositionsOrchestrationEngine:
         assert updated_balance.quantity == 1750
         assert updated_balance.burned == 250
         assert updated_balance.frozen == 50
+
+    async def test_close_position(
+        self,
+        database_provider_test,
+    ):
+        leverage, order = await self.create_order_and_leverage()
+        assert await self.balance_service.lock_balance(
+            portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
+        )
+        position = await self.positions_orchestration_engine.create_position_by_order(
+            order
+        )
+
+        order_schema = OrderSchema(
+            portfolio_id="iamrich",
+            market=Market.BTCUSD_PERP,
+            price=1100,
+            size=0.5,
+            fee=0.1,
+            side=OrderSide.SELL,
+            status=OrderStatus.FILLED,
+        )
+        order = await self.order_service.create(data=order_schema)
+        await self.positions_orchestration_engine.close_position(order, position)
+
+        updated_position = await self.position_service.read_by_id(position.id)
+        assert updated_position is not None
+        assert updated_position.status == PositionStatus.CLOSE
+        assert updated_position.pnl == 50
+
+        updated_balance = await self.balance_service.read_by_asset(
+            portfolio_id="iamrich", asset=Asset.USD
+        )
+        assert updated_balance is not None
+        assert updated_balance.available == 2000
+        assert updated_balance.quantity == 2050
+        assert updated_balance.burned == 0
+        assert updated_balance.frozen == 50
+
+        updated_order = await self.order_service.read_by_id(order.id)
+        assert updated_order is not None
+        assert updated_order.position_id == position.id
