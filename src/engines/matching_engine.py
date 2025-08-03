@@ -48,7 +48,7 @@ class MatchingEngine(BaseEngine):
             await self.match_open_orders(open_orders=open_orders)
 
     async def match_open_orders(self, open_orders: List[Order]):
-        trades = self.mm_service.get_last_trade()
+        trades = await self.mm_service.get_last_trade()
         for order in open_orders:
             if order.type == OrderType.MARKET:
                 continue
@@ -180,7 +180,7 @@ class MatchingEngine(BaseEngine):
         )
 
         if order_type == OrderType.MARKET:
-            order_schema.price = self.mm_service.get_last_trade(market=market)
+            order_schema.price = await self.mm_service.get_last_trade(market=market)
 
         payment_asset = OrderHelper.get_payment_asset(market=market, side=side)
         checked_open_position = False

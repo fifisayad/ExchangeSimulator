@@ -59,7 +59,7 @@ class PositionsOrchestrationEngine(BaseEngine):
                     await self.create_position_by_order(order=order)
 
             for key, position in open_positions.items():
-                market_last_trade = self.mm_service.get_last_trade(
+                market_last_trade = await self.mm_service.get_last_trade(
                     market=position.market
                 )
                 if position.side == PositionSide.LONG:
