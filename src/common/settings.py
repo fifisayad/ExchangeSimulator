@@ -4,6 +4,7 @@ from fifi import singleton
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode
 from ..enums.market import Market
+from ..enums.exchange import Exchange
 
 
 @singleton
@@ -27,3 +28,8 @@ class Setting(BaseSettings):
     # API Endpoints Settings
     API_PREFIX: str = "exapi"
     API_VERSION: str = "v1"
+
+    # Market Monitoring Settings
+    MM_API_PATH: str = "localhost:3456/"
+    MM_SUBSCRIPTION_PATH: str = "subscribe/"
+    MM_EXCHANGE: Exchange = Exchange.HYPERLIQUID
