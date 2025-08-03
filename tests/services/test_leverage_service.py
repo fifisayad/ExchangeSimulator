@@ -60,3 +60,29 @@ class TestLeverageService:
             assert got_leverage.leverage == leverage.leverage
             assert got_leverage.portfolio_id == leverage.portfolio_id
             assert got_leverage.market == leverage.market
+
+    async def test_update_leverage(self, database_provider_test, leverage_factory):
+        leverages_schemas: List[LeverageSchema] = leverage_factory()
+        leverage_hash_map = dict()
+
+        for leverage_schema in leverages_schemas:
+            leverage_hash_map[
+                f"{leverage_schema.portfolio_id}_{leverage_schema.market.value}"
+            ] = leverage_schema.leverage
+        leverages: List[Leverage] = await self.leverage_service.create_many(
+            data=leverages_schemas
+        )
+        for leverage in leverages:
+            got_leverage = await self.leverage_service.create_or_update_leverage(
+                portfolio_id=leverage.portfolio_id,
+                market=leverage.market,
+                leverage=leverage.leverage + 1,
+            )
+            assert got_leverage is not None
+            assert (
+                got_leverage.leverage
+                == leverage_hash_map[
+                    f"{got_leverage.portfolio_id}_{got_leverage.market.value}"
+                ]
+                + 1
+            )
