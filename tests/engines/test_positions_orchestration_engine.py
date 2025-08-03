@@ -142,3 +142,48 @@ class TestPositionsOrchestrationEngine:
         updated_order = await self.order_service.read_by_id(order.id)
         assert updated_order is not None
         assert updated_order.position_id == position.id
+
+    async def test_close_partially_position(
+        self,
+        database_provider_test,
+    ):
+        leverage, order = await self.create_order_and_leverage()
+        assert await self.balance_service.lock_balance(
+            portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
+        )
+        position = await self.positions_orchestration_engine.create_position_by_order(
+            order
+        )
+
+        order_schema = OrderSchema(
+            portfolio_id="iamrich",
+            market=Market.BTCUSD_PERP,
+            price=1100,
+            size=0.25,
+            fee=0.1,
+            side=OrderSide.SELL,
+            status=OrderStatus.FILLED,
+        )
+        order = await self.order_service.create(data=order_schema)
+        await self.positions_orchestration_engine.close_partially_position(
+            order, position
+        )
+
+        updated_position = await self.position_service.read_by_id(position.id)
+        assert updated_position is not None
+        assert updated_position.status == PositionStatus.OPEN
+        assert updated_position.pnl == 25
+        assert updated_position.margin == 125
+
+        updated_balance = await self.balance_service.read_by_asset(
+            portfolio_id="iamrich", asset=Asset.USD
+        )
+        assert updated_balance is not None
+        assert updated_balance.available == 1850
+        assert updated_balance.quantity == 2025
+        assert updated_balance.burned == 0
+        assert updated_balance.frozen == 175
+
+        updated_order = await self.order_service.read_by_id(order.id)
+        assert updated_order is not None
+        assert updated_order.position_id == position.id
