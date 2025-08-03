@@ -129,6 +129,7 @@ class TestPositionsOrchestrationEngine:
         assert updated_position is not None
         assert updated_position.status == PositionStatus.CLOSE
         assert updated_position.pnl == 50
+        assert updated_position.close_price == order.price
 
         updated_balance = await self.balance_service.read_by_asset(
             portfolio_id="iamrich", asset=Asset.USD
@@ -174,6 +175,7 @@ class TestPositionsOrchestrationEngine:
         assert updated_position.status == PositionStatus.OPEN
         assert updated_position.pnl == 25
         assert updated_position.margin == 125
+        assert updated_position.close_price == order.price
 
         updated_balance = await self.balance_service.read_by_asset(
             portfolio_id="iamrich", asset=Asset.USD
@@ -183,6 +185,56 @@ class TestPositionsOrchestrationEngine:
         assert updated_balance.quantity == 2025
         assert updated_balance.burned == 0
         assert updated_balance.frozen == 175
+
+        updated_order = await self.order_service.read_by_id(order.id)
+        assert updated_order is not None
+        assert updated_order.position_id == position.id
+
+    async def test_merge_position_with_order(
+        self,
+        database_provider_test,
+    ):
+        leverage, order = await self.create_order_and_leverage()
+        assert await self.balance_service.lock_balance(
+            portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
+        )
+        position = await self.positions_orchestration_engine.create_position_by_order(
+            order
+        )
+
+        order_schema = OrderSchema(
+            portfolio_id="iamrich",
+            market=Market.BTCUSD_PERP,
+            price=1100,
+            size=0.1,
+            fee=0.1,
+            side=OrderSide.BUY,
+            status=OrderStatus.FILLED,
+        )
+        order = await self.order_service.create(data=order_schema)
+        await self.positions_orchestration_engine.merge_order_with_position(
+            order, position
+        )
+
+        updated_position = await self.position_service.read_by_id(position.id)
+        assert updated_position is not None
+        assert updated_position.status == PositionStatus.OPEN
+        assert updated_position.pnl == 0
+        entry_price = ((1000 * 0.5) + (1100 * 0.1)) / 0.6
+        assert updated_position.entry_price == entry_price
+        assert updated_position.lqd_price == entry_price - (
+            entry_price / leverage.leverage
+        )
+        assert updated_position.margin == 305
+
+        updated_balance = await self.balance_service.read_by_asset(
+            portfolio_id="iamrich", asset=Asset.USD
+        )
+        assert updated_balance is not None
+        assert updated_balance.available == 1700
+        assert updated_balance.quantity == 2000
+        assert updated_balance.burned == 0
+        assert updated_balance.frozen == 300
 
         updated_order = await self.order_service.read_by_id(order.id)
         assert updated_order is not None
