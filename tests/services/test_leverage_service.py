@@ -40,3 +40,23 @@ class TestLeverageService:
 
             assert got_leverage is not None
             assert got_leverage == leverage.leverage
+
+    async def test_create_leverage(self, database_provider_test, leverage_factory):
+        leverages_schemas: List[LeverageSchema] = leverage_factory()
+        leverages: List[Leverage] = list()
+        for leverage_schema in leverages_schemas:
+            leverage = await self.leverage_service.create_or_update_leverage(
+                portfolio_id=leverage_schema.portfolio_id,
+                market=leverage_schema.market,
+                leverage=leverage_schema.leverage,
+            )
+            assert leverage is not None
+            leverages.append(leverage)
+
+        for leverage in leverages:
+            got_leverage = await self.leverage_service.read_by_id(id_=leverage.id)
+
+            assert got_leverage is not None
+            assert got_leverage.leverage == leverage.leverage
+            assert got_leverage.portfolio_id == leverage.portfolio_id
+            assert got_leverage.market == leverage.market
