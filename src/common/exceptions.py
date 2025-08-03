@@ -8,3 +8,7 @@ class NotEnoughBalance(InvalidOrder):
 
 class NotFoundOrder(InvalidOrder):
     pass
+
+
+class APIError(Exception):
+    pass
