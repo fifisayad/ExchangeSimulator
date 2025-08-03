@@ -127,9 +127,10 @@ class PositionsOrchestrationEngine(BaseEngine):
         )
         position.close_price = order.price
         position.pnl += PositionHelpers.pnl_value(
-            position=position,
-            price=order.price,
-            notional_value=order.price * order.size,
+            entry_price=position.entry_price,
+            close_price=order.price,
+            size=position.size,
+            side=position.side,
         )
 
         # unlock margin
@@ -170,9 +171,10 @@ class PositionsOrchestrationEngine(BaseEngine):
         )
         position.close_price = order.price
         position.pnl += PositionHelpers.pnl_value(
-            position=position,
-            price=order.price,
-            notional_value=order.price * order.size,
+            entry_price=position.entry_price,
+            close_price=order.price,
+            size=position.size,
+            side=position.side,
         )
         position.status = PositionStatus.CLOSE
 
