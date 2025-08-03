@@ -1,4 +1,5 @@
 from typing import Tuple
+from unittest.mock import patch
 from fifi import GetLogger
 import pytest
 
@@ -239,3 +240,51 @@ class TestPositionsOrchestrationEngine:
         updated_order = await self.order_service.read_by_id(order.id)
         assert updated_order is not None
         assert updated_order.position_id == position.id
+
+    async def test_apply_order_to_position(self, database_provider_test):
+        leverage, order = await self.create_order_and_leverage()
+        position = await self.positions_orchestration_engine.create_position_by_order(
+            order
+        )
+        order_schema = OrderSchema(
+            portfolio_id="iamrich",
+            market=Market.BTCUSD_PERP,
+            price=1100,
+            size=0.1,
+            fee=0.1,
+            side=OrderSide.BUY,
+            status=OrderStatus.FILLED,
+        )
+        order: Order = await self.order_service.create(data=order_schema)
+        assert order is not None
+        with patch.object(
+            self.positions_orchestration_engine,
+            "merge_order_with_position",
+            return_value=None,
+        ) as mock_method:
+            await self.positions_orchestration_engine.apply_order_to_position(
+                order, position
+            )
+            mock_method.assert_awaited_once()
+
+        order.side = OrderSide.SELL
+        with patch.object(
+            self.positions_orchestration_engine,
+            "close_partially_position",
+            return_value=None,
+        ) as mock_method:
+            await self.positions_orchestration_engine.apply_order_to_position(
+                order, position
+            )
+            mock_method.assert_awaited_once()
+
+        order.size = 0.5
+        with patch.object(
+            self.positions_orchestration_engine,
+            "close_position",
+            return_value=None,
+        ) as mock_method:
+            await self.positions_orchestration_engine.apply_order_to_position(
+                order, position
+            )
+            mock_method.assert_awaited_once()
