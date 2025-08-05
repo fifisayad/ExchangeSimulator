@@ -172,7 +172,7 @@ class TestOrderRouter:
                     order_type=order.type,
                 )
 
-    async def test_cancel_order_failed(self, database_provider_test, order_factory):
+    async def test_create_order_failed(self, database_provider_test, order_factory):
         orders = await self.create_order(order_factory)
         order = orders[-1]
         with patch.object(
