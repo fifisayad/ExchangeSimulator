@@ -91,3 +91,19 @@ class TestPortfolioRouter:
                     assert response.status_code == 404
                     mock_method_id.assert_not_awaited()
                     mock_method_name.assert_not_awaited()
+
+    async def test_create_portfolio_existed(self, database_provider_test):
+        portfolio = await self.create_portfolio()
+        portfolio_schema = PortfolioSchema(name=portfolio.name)
+        with patch.object(
+            PortfolioService, "read_by_name", return_value=portfolio
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.post(
+                    f"/portfolio", json=portfolio_schema.model_dump()
+                )
+                LOGGER.info(response.json())
+                assert response.status_code == 400
+                mock_method.assert_awaited_once_with(portfolio.name)
