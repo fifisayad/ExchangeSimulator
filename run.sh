@@ -28,4 +28,5 @@ exec gunicorn main:app \
   --bind $BIND \
   --log-level=$LOG_LEVEL \
   --error-logfile=$ERROR_LOG \
-  --access-logfile=$ACCESS_LOG
+  --access-logfile=$ACCESS_LOG \
+  --capture-output
