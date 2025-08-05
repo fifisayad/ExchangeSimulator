@@ -57,3 +57,37 @@ class TestPortfolioRouter:
                     == PortfolioResponseSchema(**portfolio.to_dict()).model_dump()
                 )
                 mock_method.assert_awaited_once_with(id_=portfolio.id)
+
+    async def test_get_portfolio_failed(self, database_provider_test):
+        portfolio = await self.create_portfolio()
+        with patch.object(
+            PortfolioService, "read_by_id", return_value=None
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.get(f"/portfolio?id={portfolio.id}")
+                assert response.status_code == 404
+                mock_method.assert_awaited_once_with(id_=portfolio.id)
+        with patch.object(
+            PortfolioService, "read_by_name", return_value=None
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.get(f"/portfolio?name={portfolio.name}")
+                assert response.status_code == 404
+                mock_method.assert_awaited_once_with(name=portfolio.name)
+        with patch.object(
+            PortfolioService, "read_by_id", return_value=None
+        ) as mock_method_id:
+            with patch.object(
+                PortfolioService, "read_by_name", return_value=None
+            ) as mock_method_name:
+                async with AsyncClient(
+                    transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+                ) as ac:
+                    response = await ac.get(f"/portfolio")
+                    assert response.status_code == 404
+                    mock_method_id.assert_not_awaited()
+                    mock_method_name.assert_not_awaited()
