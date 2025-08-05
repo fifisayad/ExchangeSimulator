@@ -40,9 +40,11 @@ async def get_balance(
             return await balance_service.read_by_asset(
                 portfolio_id=portfolio_id, asset=asset
             )
-        return await balance_service.read_many_by_portfolio_id(
+        balances = await balance_service.read_many_by_portfolio_id(
             portfolio_id=portfolio_id
         )
+        if balances:
+            return balances
     raise HTTPException(status_code=404, detail="balance not found")
 
 
