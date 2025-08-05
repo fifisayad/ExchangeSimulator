@@ -22,6 +22,24 @@ class TestPortfolioRouter:
         portfolio_schema = PortfolioSchema(name=portfolio_name)
         return await self.portfolio_service.create(data=portfolio_schema)
 
+    async def test_get_portfolio_success_by_name(self, database_provider_test):
+        portfolio = await self.create_portfolio()
+        with patch.object(
+            PortfolioService, "read_by_name", return_value=portfolio
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.get(f"/portfolio?name={portfolio.name}")
+                assert response.status_code == 200
+                LOGGER.info(f"portfolio response: {response.json()}")
+
+                assert (
+                    response.json()
+                    == PortfolioResponseSchema(**portfolio.to_dict()).model_dump()
+                )
+                mock_method.assert_awaited_once_with(name=portfolio.name)
+
     async def test_get_portfolio_success_by_id(self, database_provider_test):
         portfolio = await self.create_portfolio()
         with patch.object(
