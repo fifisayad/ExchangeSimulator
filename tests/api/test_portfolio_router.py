@@ -1,13 +1,9 @@
 from fifi import GetLogger
 import pytest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from httpx import ASGITransport, AsyncClient
 from main import app
-from fastapi.encoders import jsonable_encoder
 
-from src.enums.data_type import DataType
-from src.enums.exchange import Exchange
-from src.enums.market import Market
 from src.schemas.portfolio_schema import PortfolioResponseSchema, PortfolioSchema
 from src.services import PortfolioService
 
