@@ -8,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from src.common.exceptions import InvalidOrder
 from src.services import OrderService
 from src.engines.matching_engine import MatchingEngine
-from src.schemas.order_schema import OrderResponseSchema
+from src.schemas.order_schema import OrderCreateSchema, OrderResponseSchema
 from tests.materials import *
 
 LOGGER = GetLogger().get()
@@ -142,5 +142,48 @@ class TestOrderRouter:
                 transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
             ) as ac:
                 response = await ac.patch(f"/order/cancel?order_id=sdfsfd")
+                assert response.status_code == 400
+                LOGGER.info(f"order response: {response.json()}")
+
+    async def test_create_order(self, database_provider_test, order_factory):
+        orders = await self.create_order(order_factory)
+        order = orders[-1]
+        with patch.object(
+            MatchingEngine(), "create_order", return_value=order
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.post(
+                    f"/order",
+                    json=jsonable_encoder(OrderCreateSchema(**order.to_dict())),
+                )
+                assert response.status_code == 200
+                LOGGER.info(f"order response: {response.json()}")
+                assert response.json() == jsonable_encoder(
+                    OrderResponseSchema(**order.to_dict())
+                )
+                mock_method.assert_awaited_once_with(
+                    portfolio_id=order.portfolio_id,
+                    market=order.market,
+                    price=order.price,
+                    size=order.size,
+                    side=order.side,
+                    order_type=order.type,
+                )
+
+    async def test_cancel_order_failed(self, database_provider_test, order_factory):
+        orders = await self.create_order(order_factory)
+        order = orders[-1]
+        with patch.object(
+            MatchingEngine(), "create_order", side_effect=InvalidOrder
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.post(
+                    f"/order",
+                    json=jsonable_encoder(OrderCreateSchema(**order.to_dict())),
+                )
                 assert response.status_code == 400
                 LOGGER.info(f"order response: {response.json()}")
