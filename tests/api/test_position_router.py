@@ -36,3 +36,18 @@ class TestPositionRouter:
                     PositionResponseSchema(**position.to_dict())
                 )
                 mock_method.assert_awaited_once_with(id_=position.id)
+
+    async def test_position_read_by_id_failed(
+        self, database_provider_test, position_factory
+    ):
+        with patch.object(
+            PositionService, "read_by_id", return_value=None
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.get(f"/position?position_id=SHIT")
+                assert response.status_code == 404
+                LOGGER.info(f"position response: {response.json()}")
+
+                mock_method.assert_awaited_once_with(id_="SHIT")
