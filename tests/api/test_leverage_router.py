@@ -4,9 +4,6 @@ from unittest.mock import patch
 from httpx import ASGITransport, AsyncClient
 from main import app
 
-from src.schemas.leverage_schema import LeverageSchema
-from src.schemas.portfolio_schema import PortfolioResponseSchema, PortfolioSchema
-from src.services import PortfolioService
 from src.services.leverage_service import LeverageService
 from tests.materials import *
 
