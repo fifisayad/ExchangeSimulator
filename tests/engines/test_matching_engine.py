@@ -1,4 +1,5 @@
 import pytest
+import logging
 from unittest.mock import patch
 
 from src.common.exceptions import InvalidOrder, NotFoundOrder
@@ -17,7 +18,7 @@ from src.services import (
 from tests.materials import *
 
 
-LOGGER = GetLogger().get()
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

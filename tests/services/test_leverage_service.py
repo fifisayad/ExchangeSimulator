@@ -1,10 +1,12 @@
 import pytest
+import logging
 
 from src.models import Leverage
 from src.services import LeverageService
 from tests.materials import *
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

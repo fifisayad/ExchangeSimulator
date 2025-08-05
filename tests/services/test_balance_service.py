@@ -1,10 +1,12 @@
 import pytest
+import logging
 
 from src.models.balance import Balance
 from src.services import BalanceService
 from tests.materials import *
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

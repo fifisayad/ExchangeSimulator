@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 from fifi import GetLogger, singleton, BaseEngine
 
@@ -14,7 +15,8 @@ from ..enums.order_type import OrderType
 from ..services import *
 from ..repository import *
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @singleton
@@ -87,7 +89,7 @@ class MatchingEngine(BaseEngine):
     async def fill_order(self, order: Order) -> Order:
         if order.status != OrderStatus.ACTIVE:
             LOGGER.info(f"can not fill this {order.id=} {order.status=}")
-            return
+            return order
         LOGGER.info(f"fill {order.id=}")
         order.status = OrderStatus.FILLED
         recieved_asset = OrderHelper.get_recieved_asset(

@@ -1,5 +1,6 @@
 from fifi import GetLogger
 import pytest
+import logging
 from unittest.mock import patch
 from httpx import ASGITransport, AsyncClient
 from main import app
@@ -11,7 +12,8 @@ from src.engines.matching_engine import MatchingEngine
 from src.schemas.order_schema import OrderCreateSchema, OrderResponseSchema
 from tests.materials import *
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

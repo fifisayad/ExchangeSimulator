@@ -1,4 +1,5 @@
 import httpx
+import logging
 from typing import Dict, Optional, Union, overload
 from fifi import RedisSubscriber, singleton, GetLogger
 
@@ -9,7 +10,7 @@ from ..enums.market import Market
 from ..common.settings import Setting
 
 
-LOGGER = GetLogger().get()
+LOGGER = logging.getLogger(__name__)
 
 
 @singleton

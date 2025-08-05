@@ -1,12 +1,14 @@
 from typing import Set
 from fifi.helpers.get_current_time import GetCurrentTime
 import pytest
+import logging
 
 from src.models import Position
 from src.services import PositionService
 from tests.materials import *
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

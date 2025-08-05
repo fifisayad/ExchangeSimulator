@@ -2,6 +2,7 @@ from typing import Tuple
 from unittest.mock import patch
 from fifi import GetLogger
 import pytest
+import logging
 
 from src.enums.asset import Asset
 from src.enums.market import Market
@@ -18,7 +19,8 @@ from src.schemas.position_schema import PositionSchema
 from src.services import *
 from src.engines.positions_orchestration_engine import PositionsOrchestrationEngine
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

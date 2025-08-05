@@ -1,4 +1,5 @@
 from typing import List, Optional
+import logging
 
 from fifi import GetLogger, BaseService
 
@@ -9,7 +10,8 @@ from ..enums.asset import Asset
 from ..models import Order
 from ..repository import BalanceRepository
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 class BalanceService(BaseService):

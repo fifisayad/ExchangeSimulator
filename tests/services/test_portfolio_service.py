@@ -1,9 +1,11 @@
+import logging
 import pytest
 
 from src.services import PortfolioService
 from tests.materials import *
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

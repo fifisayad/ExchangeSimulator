@@ -1,5 +1,6 @@
 from fifi import GetLogger
 import pytest
+import logging
 from unittest.mock import patch
 from httpx import ASGITransport, AsyncClient
 from main import app
@@ -7,7 +8,8 @@ from main import app
 from src.schemas.portfolio_schema import PortfolioResponseSchema, PortfolioSchema
 from src.services import PortfolioService
 
-LOGGER = GetLogger().get()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio

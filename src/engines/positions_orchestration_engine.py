@@ -1,3 +1,4 @@
+import logging
 from fifi import GetLogger, singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 
@@ -17,7 +18,7 @@ from ..services import (
 )
 
 
-LOGGER = GetLogger().get()
+LOGGER = logging.getLogger(__name__)
 
 
 @singleton

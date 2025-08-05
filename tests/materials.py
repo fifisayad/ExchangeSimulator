@@ -2,6 +2,7 @@ import random
 import uuid
 from typing import List
 import pytest
+import logging
 
 from fifi import GetLogger
 from faker import Faker
@@ -19,7 +20,7 @@ from src.schemas.position_schema import PositionSchema
 
 fake = Faker()
 setting = Setting()
-LOGGER = GetLogger().get()
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture

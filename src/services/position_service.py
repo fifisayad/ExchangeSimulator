@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List, Optional
 from fifi import GetLogger, BaseService
 
@@ -8,7 +9,7 @@ from ..models import Position
 from ..repository import PositionRepository
 
 
-LOGGER = GetLogger().get()
+LOGGER = logging.getLogger(__name__)
 
 
 class PositionService(BaseService):
