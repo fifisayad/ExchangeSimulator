@@ -51,3 +51,32 @@ class TestPositionRouter:
                 LOGGER.info(f"position response: {response.json()}")
 
                 mock_method.assert_awaited_once_with(id_="SHIT")
+
+    async def test_position_read_by_portfolio_id(
+        self, database_provider_test, position_factory
+    ):
+        positions = await self.create_position(position_factory)
+        position = positions[-1]
+        with patch.object(
+            PositionService, "get_positions", return_value=positions
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.get(
+                    f"/position?portfolio_id={position.portfolio_id}"
+                )
+                assert response.status_code == 200
+                LOGGER.info(f"position response: {response.json()}")
+                expected_list = []
+                for _position in positions:
+                    expected_list.append(
+                        jsonable_encoder(PositionResponseSchema(**_position.to_dict()))
+                    )
+                assert response.json() == expected_list
+                mock_method.assert_awaited_once_with(
+                    portfolio_id=position.portfolio_id,
+                    market=None,
+                    status=None,
+                    side=None,
+                )
