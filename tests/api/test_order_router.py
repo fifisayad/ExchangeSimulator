@@ -5,7 +5,9 @@ from httpx import ASGITransport, AsyncClient
 from main import app
 from fastapi.encoders import jsonable_encoder
 
+from src.common.exceptions import InvalidOrder
 from src.services import OrderService
+from src.engines.matching_engine import MatchingEngine
 from src.schemas.order_schema import OrderResponseSchema
 from tests.materials import *
 
@@ -114,3 +116,31 @@ class TestOrderRouter:
             response = await ac.get(f"""/order""")
             assert response.status_code == 400
             LOGGER.info(f"order response: {response.json()}")
+
+    async def test_cancel_order(self, database_provider_test, order_factory):
+        orders = await self.create_order(order_factory)
+        order = orders[-1]
+        with patch.object(
+            MatchingEngine(), "cancel_order", return_value=order
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.patch(f"/order/cancel?order_id={order.id}")
+                assert response.status_code == 200
+                LOGGER.info(f"order response: {response.json()}")
+                assert response.json() == jsonable_encoder(
+                    OrderResponseSchema(**order.to_dict())
+                )
+                mock_method.assert_awaited_once_with(order_id=order.id)
+
+    async def test_cancel_order_failed(self, database_provider_test):
+        with patch.object(
+            MatchingEngine, "cancel_order", side_effect=InvalidOrder
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.patch(f"/order/cancel?order_id=sdfsfd")
+                assert response.status_code == 400
+                LOGGER.info(f"order response: {response.json()}")
