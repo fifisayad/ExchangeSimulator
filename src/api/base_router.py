@@ -20,9 +20,7 @@ async def lifespan(app: FastAPI):
     await PositionsOrchestrationEngine().stop()
 
 
-base_router = APIRouter(
-    prefix=f"/{setting.API_VERSION}", tags=["ExchangeAPIs"], lifespan=lifespan
-)
+base_router = APIRouter(tags=["ExchangeAPIs"], lifespan=lifespan)
 
 
 base_router.include_router(router=router_v1)
