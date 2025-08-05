@@ -147,3 +147,25 @@ class TestPortfolioRouter:
                 LOGGER.info(response.json())
                 assert response.status_code == 400
                 mock_method_read.assert_awaited_once_with(portfolio.name)
+
+    async def test_update_portfolio_exception(self, database_provider_test):
+        portfolio = await self.create_portfolio()
+        portfolio_schema = PortfolioSchema(name=portfolio.name, perp_maker_fee=0.0025)
+        with patch.object(
+            PortfolioService, "update_by_name", return_value=portfolio
+        ) as mock_method_read:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.patch(
+                    f"/portfolio", json=portfolio_schema.model_dump()
+                )
+                LOGGER.info(response.json())
+                assert response.status_code == 200
+                assert (
+                    response.json()
+                    == PortfolioResponseSchema(**portfolio.to_dict()).model_dump()
+                )
+                mock_method_read.assert_awaited_once_with(
+                    name=portfolio.name, data=portfolio_schema
+                )
