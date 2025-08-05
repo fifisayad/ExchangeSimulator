@@ -52,3 +52,5 @@ uvloop==0.21.0
 watchfiles==1.1.0
 websockets==15.0.1
 orjson==3.11.1
+trio==0.30.0
+gunicorn==23.0.0

@@ -1,0 +1,10 @@
+version: '3.8'
+
+name: exchange-simulator-service
+services:
+  market-monitoring:
+    container_name: exchange-simulator
+    build: .
+    ports:
+      - "1889:1889"
+    entrypoint: ["/bin/sh", "-c", "exec ./run.sh"]
