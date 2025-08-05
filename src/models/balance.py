@@ -1,5 +1,5 @@
 from fifi import DatetimeDecoratedBase
-from sqlalchemy import CheckConstraint, ForeignKey
+from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..enums.asset import Asset
@@ -32,6 +32,12 @@ class Balance(DatetimeDecoratedBase):
         nullable=False,
     )
 
+    # constraints
+    __table_args__ = (
+        UniqueConstraint(
+            "portfolio_id", "asset", name="uq_portfolio_market_combination"
+        ),
+    )
     # relationships
     portfolio: Mapped["Portfolio"] = relationship(
         "Portfolio", back_populates="balances"
