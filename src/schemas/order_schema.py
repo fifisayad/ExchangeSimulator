@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 from ..enums.order_status import OrderStatus
@@ -36,4 +37,4 @@ class OrderResponseSchema(BaseModel):
     status: OrderStatus
     side: OrderSide
     type: OrderType
-    position_id: str
+    position_id: Optional[str]
