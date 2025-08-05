@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from fifi import GetLogger
 from src import Setting, base_router
 
 
+LOGGER = GetLogger().get()
 setting = Setting()
 
 # Create fastapi server
