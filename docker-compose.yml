@@ -2,7 +2,7 @@ version: '3.8'
 
 name: exchange-simulator-service
 services:
-  market-monitoring:
+  exchange-simulator:
     container_name: exchange-simulator
     build: .
     ports:
