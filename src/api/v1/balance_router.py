@@ -37,9 +37,11 @@ async def get_balance(
             return balance
     if portfolio_id:
         if asset:
-            return await balance_service.read_by_asset(
+            balance = await balance_service.read_by_asset(
                 portfolio_id=portfolio_id, asset=asset
             )
+            if balance:
+                return balance
         balances = await balance_service.read_many_by_portfolio_id(
             portfolio_id=portfolio_id
         )
