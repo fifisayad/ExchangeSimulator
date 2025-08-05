@@ -107,3 +107,23 @@ class TestPositionRouter:
                     status=position.status,
                     side=position.side,
                 )
+
+    async def test_position_read_by_filters_failed(self, database_provider_test):
+        with patch.object(
+            PositionService, "get_positions", return_value=[]
+        ) as mock_method:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test/exapi/v1"
+            ) as ac:
+                response = await ac.get(
+                    f"""/position?portfolio_id=h1&market={Market.BTCUSD.value}&status={PositionStatus.LIQUID.value}&side={PositionSide.SHORT.value}"""
+                )
+                assert response.status_code == 404
+                LOGGER.info(f"position response: {response.json()}")
+
+                mock_method.assert_awaited_once_with(
+                    portfolio_id="h1",
+                    market=Market.BTCUSD,
+                    status=PositionStatus.LIQUID,
+                    side=PositionSide.SHORT,
+                )
