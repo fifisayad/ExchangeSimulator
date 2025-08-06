@@ -35,7 +35,7 @@ class Balance(DatetimeDecoratedBase):
     # constraints
     __table_args__ = (
         UniqueConstraint(
-            "portfolio_id", "asset", name="uq_portfolio_market_combination"
+            "portfolio_id", "asset", name="balance_uq_portfolio_asset_combination"
         ),
     )
     # relationships

@@ -17,7 +17,7 @@ class Leverage(DatetimeDecoratedBase):
     # constraints
     __table_args__ = (
         UniqueConstraint(
-            "portfolio_id", "market", name="uq_portfolio_market_combination"
+            "portfolio_id", "market", name="levearage_uq_portfolio_market_combination"
         ),
     )
     # relationships
