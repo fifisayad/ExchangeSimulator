@@ -1,6 +1,7 @@
 import httpx
 import logging
 from typing import Dict, Optional, Union, overload
+from fastapi.encoders import jsonable_encoder
 from fifi import RedisSubscriber, singleton, GetLogger
 
 from ..enums.data_type import DataType
@@ -40,7 +41,9 @@ class MarketMonitoringService:
                 transport=httpx.AsyncHTTPTransport(retries=3),
                 headers={"Content-Type": "application/json"},
             ) as client:
-                resp = await client.post(url, json=subscritption_schema.model_dump())
+                resp = await client.post(
+                    url, json=jsonable_encoder(subscritption_schema)
+                )
                 resp.raise_for_status()
                 return resp.json()["channel"]
         except Exception as e:
