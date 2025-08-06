@@ -1,6 +1,6 @@
 import logging
 from typing import List, Optional
-from fifi import GetLogger, singleton, BaseEngine
+from fifi import singleton, BaseEngine
 
 from ..enums.position_status import PositionStatus
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
@@ -33,12 +33,13 @@ class MatchingEngine(BaseEngine):
         self.leverage_service = LeverageService()
 
     async def preprocess(self):
-        pass
+        await self.mm_service.start()
 
     async def postprocess(self):
         pass
 
     async def process(self):
+        LOGGER.info(f"{self.name} processing is started....")
         while True:
             # get open orders from db
             open_orders = await self.order_service.get_open_orders()

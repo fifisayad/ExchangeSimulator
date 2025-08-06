@@ -1,5 +1,5 @@
 import logging
-from fifi import GetLogger, singleton, BaseEngine
+from fifi import singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 
 from src.enums.asset import Asset
@@ -34,12 +34,13 @@ class PositionsOrchestrationEngine(BaseEngine):
         self.mm_service = MarketMonitoringService()
 
     async def preprocess(self):
-        pass
+        await self.mm_service.start()
 
     async def postprocess(self):
         pass
 
     async def process(self):
+        LOGGER.info(f"{self.name} processing is started....")
         last_update = GetCurrentTime().get()
         while True:
             check_time = GetCurrentTime().get()
