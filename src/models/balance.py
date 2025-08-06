@@ -13,21 +13,21 @@ class Balance(DatetimeDecoratedBase):
     )
     asset: Mapped[Asset] = mapped_column(nullable=False)
     quantity: Mapped[float] = mapped_column(
-        CheckConstraint("quantity >= 0", name="ck_value_positive"), nullable=False
+        CheckConstraint("quantity >= 0", name="ck_quantity_positive"), nullable=False
     )
     available: Mapped[float] = mapped_column(
-        CheckConstraint("available >= 0", name="ck_value_positive"), nullable=False
+        CheckConstraint("available >= 0", name="ck_available_positive"), nullable=False
     )
     frozen: Mapped[float] = mapped_column(
-        CheckConstraint("frozen >= 0", name="ck_value_positive"), nullable=False
+        CheckConstraint("frozen >= 0", name="ck_frozen_positive"), nullable=False
     )
     burned: Mapped[float] = mapped_column(
-        CheckConstraint("burned >= 0", name="ck_value_positive"),
+        CheckConstraint("burned >= 0", name="ck_burned_positive"),
         default=0,
         nullable=False,
     )
     fee_paid: Mapped[float] = mapped_column(
-        CheckConstraint("fee_paid >= 0", name="ck_value_positive"),
+        CheckConstraint("fee_paid >= 0", name="ck_fee_paid_positive"),
         default=0,
         nullable=False,
     )
