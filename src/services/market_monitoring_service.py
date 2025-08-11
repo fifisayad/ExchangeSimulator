@@ -25,6 +25,8 @@ class MarketMonitoringService:
         self.subscribers = dict()
 
     async def start(self):
+        if len(self.subscribers) > 0:
+            return
         LOGGER.info("Monitoring Service initializing is started....")
         for market in self.setting.ACTIVE_MARKETS:
             channel = await self.subscribe(market=market, data_type=DataType.TRADES)
