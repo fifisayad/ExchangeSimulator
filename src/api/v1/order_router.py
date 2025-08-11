@@ -63,8 +63,6 @@ async def create_order(
         )
     except InvalidOrder as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @order_router.patch("/cancel", response_model=OrderResponseSchema)
