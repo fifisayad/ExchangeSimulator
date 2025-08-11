@@ -27,6 +27,5 @@ exec gunicorn main:app \
   --worker-class $WORKER_CLASS \
   --bind $BIND \
   --log-level=$LOG_LEVEL \
-  --error-logfile=$ERROR_LOG \
-  --access-logfile=$ACCESS_LOG \
-  --capture-output
+  --error-logfile - \
+  --access-logfile -
