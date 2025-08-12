@@ -63,10 +63,10 @@ class MarketMonitoringService:
         if market:
             last_trade = await self.subscribers[market].get_last_message()
             if last_trade:
-                self.trades[market] = last_trade["price"]
+                self.trades[market] = last_trade["data"]["price"]
             return self.trades[market]
         for sub_market in self.subscribers:
             last_trade = await self.subscribers[sub_market].get_last_message()
             if last_trade:
-                self.trades[sub_market] = last_trade["price"]
+                self.trades[sub_market] = last_trade["data"]["price"]
         return self.trades
