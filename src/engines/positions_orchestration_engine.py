@@ -47,7 +47,9 @@ class PositionsOrchestrationEngine(BaseEngine):
             filled_perp_orders = await self.order_service.get_filled_perp_orders(
                 from_update_time=last_update
             )
-            last_update = check_time
+            if len(filled_perp_orders) > 0:
+                last_update = check_time
+                LOGGER.info("new filled orders are arrived...")
 
             open_positions = await self.position_service.get_open_positions_hashmap()
 
