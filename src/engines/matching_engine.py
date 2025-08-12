@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import List, Optional
 from fifi import singleton, BaseEngine
 
@@ -41,14 +42,19 @@ class MatchingEngine(BaseEngine):
     async def process(self):
         LOGGER.info(f"{self.name} processing is started....")
         while True:
-            # get open orders from db
-            open_orders = await self.order_service.get_open_orders()
+            try:
+                # get open orders from db
+                open_orders = await self.order_service.get_open_orders()
 
-            # check open orders not empty
-            if not open_orders:
-                continue
+                # check open orders not empty
+                if not open_orders:
+                    continue
 
-            await self.match_open_orders(open_orders=open_orders)
+                await self.match_open_orders(open_orders=open_orders)
+            except Exception:
+                msg_error = traceback.format_exc()
+                LOGGER.info(f"{self.name} crashed: {msg_error}")
+                raise
 
     async def match_open_orders(self, open_orders: List[Order]):
         trades = await self.mm_service.get_last_trade()
