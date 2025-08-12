@@ -105,8 +105,6 @@ class BalanceService(BaseService):
         Returns:
             bool: True if the operation was successful, False otherwise.
         """
-        if qty <= 0:
-            raise ValueError("Quantity must be positive.")
         asset_balance = await self.read_by_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.quantity += qty
