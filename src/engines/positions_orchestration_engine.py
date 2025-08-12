@@ -33,6 +33,7 @@ class PositionsOrchestrationEngine(BaseEngine):
         self.position_service = PositionService()
         self.leverage_service = LeverageService()
         self.mm_service = MarketMonitoringService()
+        self.processed_orders = set()
 
     async def preprocess(self):
         await self.mm_service.start()
@@ -59,13 +60,15 @@ class PositionsOrchestrationEngine(BaseEngine):
 
                 LOGGER.debug(f"{len(filled_perp_orders)=}, {len(open_positions)=}")
                 for order in filled_perp_orders:
-                    position_key = f"{order.market}_{order.portfolio_id}"
-                    if position_key in open_positions:
-                        await self.apply_order_to_position(
-                            order=order, position=open_positions[position_key]
-                        )
-                    else:
-                        await self.create_position_by_order(order=order)
+                    if order.id not in self.processed_orders:
+                        position_key = f"{order.market}_{order.portfolio_id}"
+                        if position_key in open_positions:
+                            await self.apply_order_to_position(
+                                order=order, position=open_positions[position_key]
+                            )
+                        else:
+                            await self.create_position_by_order(order=order)
+                        self.processed_orders.add(order.id)
 
                 for key, position in open_positions.items():
                     market_last_trade = await self.mm_service.get_last_trade(
