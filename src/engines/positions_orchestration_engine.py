@@ -1,4 +1,5 @@
 import logging
+import traceback
 from fifi import singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 
@@ -43,39 +44,46 @@ class PositionsOrchestrationEngine(BaseEngine):
         LOGGER.info(f"{self.name} processing is started....")
         last_update = GetCurrentTime().get()
         while True:
-            check_time = GetCurrentTime().get()
-            filled_perp_orders = await self.order_service.get_filled_perp_orders(
-                from_update_time=last_update
-            )
-            if len(filled_perp_orders) > 0:
-                last_update = check_time
-                LOGGER.info("new filled orders are arrived...")
-
-            open_positions = await self.position_service.get_open_positions_hashmap()
-
-            LOGGER.info(f"{len(filled_perp_orders)=}, {len(open_positions)=}")
-            for order in filled_perp_orders:
-                position_key = f"{order.market}_{order.portfolio_id}"
-                if position_key in open_positions:
-                    await self.apply_order_to_position(
-                        order=order, position=open_positions[position_key]
-                    )
-                else:
-                    await self.create_position_by_order(order=order)
-
-            for key, position in open_positions.items():
-                market_last_trade = await self.mm_service.get_last_trade(
-                    market=position.market
+            try:
+                check_time = GetCurrentTime().get()
+                filled_perp_orders = await self.order_service.get_filled_perp_orders(
+                    from_update_time=last_update
                 )
-                if position.side == PositionSide.LONG:
-                    if position.lqd_price < market_last_trade:
-                        continue
+                if len(filled_perp_orders) > 0:
+                    last_update = check_time
+                    LOGGER.info("new filled orders are arrived...")
 
-                if position.side == PositionSide.SHORT:
-                    if position.lqd_price > market_last_trade:
-                        continue
+                open_positions = (
+                    await self.position_service.get_open_positions_hashmap()
+                )
 
-                await self.liquid_position(position=position)
+                LOGGER.info(f"{len(filled_perp_orders)=}, {len(open_positions)=}")
+                for order in filled_perp_orders:
+                    position_key = f"{order.market}_{order.portfolio_id}"
+                    if position_key in open_positions:
+                        await self.apply_order_to_position(
+                            order=order, position=open_positions[position_key]
+                        )
+                    else:
+                        await self.create_position_by_order(order=order)
+
+                for key, position in open_positions.items():
+                    market_last_trade = await self.mm_service.get_last_trade(
+                        market=position.market
+                    )
+                    if position.side == PositionSide.LONG:
+                        if position.lqd_price < market_last_trade:
+                            continue
+
+                    if position.side == PositionSide.SHORT:
+                        if position.lqd_price > market_last_trade:
+                            continue
+
+                    await self.liquid_position(position=position)
+            except Exception:
+                msg_error = traceback.format_exc()
+                LOGGER.info(f"{self.name} crashed: {msg_error}")
+                raise
 
     async def apply_order_to_position(self, order: Order, position: Position) -> None:
         """Applies an order to an existing position, either merging or closing it.
