@@ -53,6 +53,7 @@ class PositionsOrchestrationEngine(BaseEngine):
 
             open_positions = await self.position_service.get_open_positions_hashmap()
 
+            LOGGER.info(f"{len(filled_perp_orders)=}, {len(open_positions)=}")
             for order in filled_perp_orders:
                 position_key = f"{order.market}_{order.portfolio_id}"
                 if position_key in open_positions:
