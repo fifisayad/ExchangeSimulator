@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from fifi import db_async_session
 from fifi.exceptions import NotExistedSessionException
-from sqlalchemy import and_, select
+from sqlalchemy import Text, and_, cast, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .simulator_base_repository import SimulatorBaseRepository
@@ -85,7 +85,10 @@ class OrderRepository(SimulatorBaseRepository):
         if not session:
             raise NotExistedSessionException("session is not existed")
         stmt = select(self.model).where(
-            and_(Order.status == OrderStatus.FILLED, Order.market.ilike("%perp%"))
+            and_(
+                Order.status == OrderStatus.FILLED,
+                cast(Order.market, Text).ilike("%perp%"),
+            )
         )
         if from_update_time:
             stmt = stmt.where(Order.updated_at >= from_update_time)
