@@ -66,6 +66,8 @@ class BalanceService(BaseService):
         asset_balance = await self.read_by_asset(portfolio_id, asset)
         if asset_balance:
             asset_balance.frozen -= unlocked_qty
+            if asset_balance.frozen < 0:
+                asset_balance.frozen = 0
             asset_balance.available += unlocked_qty
             await self.repo.update_entity(asset_balance)
             return True
