@@ -1,16 +1,18 @@
+import datetime
 import logging
 import traceback
 from fifi import singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 
-from src.enums.asset import Asset
-from src.enums.position_side import PositionSide
-from src.enums.position_status import PositionStatus
-from src.helpers.position_helpers import PositionHelpers
-from src.models.order import Order
-from src.models.position import Position
-from src.schemas.position_schema import PositionSchema
-from src.services.leverage_service import LeverageService
+from ..common.settings import Setting
+from ..enums.asset import Asset
+from ..enums.position_side import PositionSide
+from ..enums.position_status import PositionStatus
+from ..helpers.position_helpers import PositionHelpers
+from ..models.order import Order
+from ..models.position import Position
+from ..schemas.position_schema import PositionSchema
+from ..services.leverage_service import LeverageService
 from ..services import (
     OrderService,
     BalanceService,
@@ -86,6 +88,12 @@ class PositionsOrchestrationEngine(BaseEngine):
             except Exception:
                 msg_error = traceback.format_exc()
                 LOGGER.info(f"{self.name} crashed: {msg_error}")
+                with open(
+                    f"{Setting().EXCEPTION_LOGS_PATH}{self.name}.txt", "w+"
+                ) as repofile:
+                    repofile.write(
+                        f"{datetime.datetime.now(datetime.UTC)}: {self.name} crashes: {msg_error}"
+                    )
                 raise
 
     async def apply_order_to_position(self, order: Order, position: Position) -> None:

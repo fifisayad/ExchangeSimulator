@@ -1,8 +1,10 @@
+import datetime
 import logging
 import traceback
 from typing import List, Optional
 from fifi import singleton, BaseEngine
 
+from ..common.settings import Setting
 from ..enums.position_status import PositionStatus
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
 from ..enums.market import Market
@@ -54,6 +56,12 @@ class MatchingEngine(BaseEngine):
             except Exception:
                 msg_error = traceback.format_exc()
                 LOGGER.info(f"{self.name} crashed: {msg_error}")
+                with open(
+                    f"{Setting().EXCEPTION_LOGS_PATH}{self.name}.txt", "w+"
+                ) as repofile:
+                    repofile.write(
+                        f"{datetime.datetime.now(datetime.UTC)}: {self.name} crashes: {msg_error}"
+                    )
                 raise
 
     async def match_open_orders(self, open_orders: List[Order]):

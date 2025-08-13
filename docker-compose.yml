@@ -5,6 +5,9 @@ services:
   exchange-simulator:
     container_name: exchange-simulator
     build: .
+    volumes:
+      - .env:/app/.env
+      - ./logs/:/app/logs
     ports:
       - "1889:1889"
     entrypoint: ["/bin/sh", "-c", "exec ./run.sh"]

@@ -33,3 +33,6 @@ class Setting(BaseSettings):
     MM_API_PATH: str = "localhost:3456/"
     MM_SUBSCRIPTION_PATH: str = "subscribe/"
     MM_EXCHANGE: Exchange = Exchange.HYPERLIQUID
+
+    # Logs Path
+    EXCEPTION_LOGS_PATH: str = "./logs/"
