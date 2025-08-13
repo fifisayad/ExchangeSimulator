@@ -26,7 +26,7 @@ LOGGER = logging.getLogger(__name__)
 @pytest.fixture
 def portfolio_factory():
     def create_portfolio():
-        return PortfolioSchema(name=fake.first_name())
+        return PortfolioSchema(name=str(fake.random_letters(10)))
 
     return create_portfolio
 
