@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 import logging
 from typing import Dict, Optional, Union, overload
 from fastapi.encoders import jsonable_encoder
@@ -31,6 +32,10 @@ class MarketMonitoringService:
         for market in self.setting.ACTIVE_MARKETS:
             channel = await self.subscribe(market=market, data_type=DataType.TRADES)
             self.subscribers[market] = await RedisSubscriber.create(channel=channel)
+            self.trades[market] = -1
+            while self.trades[market] == -1:
+                await asyncio.sleep(0.5)
+                await self.get_last_trade(market=market)
 
     async def subscribe(self, market: Market, data_type: DataType) -> str:
         url = f"{self.setting.MM_API_PATH}{self.setting.MM_SUBSCRIPTION_PATH}"
