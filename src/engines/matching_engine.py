@@ -84,11 +84,20 @@ class MatchingEngine(BaseEngine):
             market=order.market, price=order.price, size=order.size, side=order.side
         )
 
-        await self.balance_service.unlock_balance(
-            portfolio_id=order.portfolio_id,
-            asset=payment_asset,
-            unlocked_qty=payment_total,
-        )
+        is_close_order = False
+        if order.market.is_perptual():
+            is_close_order = await self.perpetual_open_position_check(
+                market=order.market,
+                portfolio_id=order.portfolio_id,
+                size=order.size,
+                side=order.side,
+            )
+        if not is_close_order:
+            await self.balance_service.unlock_balance(
+                portfolio_id=order.portfolio_id,
+                asset=payment_asset,
+                unlocked_qty=payment_total,
+            )
 
         await self.order_service.update_entity(order)
         return order
