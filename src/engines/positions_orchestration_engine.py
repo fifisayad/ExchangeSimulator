@@ -250,6 +250,7 @@ class PositionsOrchestrationEngine(BaseEngine):
             position_schema.size, position_schema.leverage, position_schema.entry_price
         )
         position = await self.position_service.create(position_schema)
+        position.pnl = -(order.fee)
         LOGGER.info(
             f"created new position by id:{position.id} by order with id: {order.id}"
         )
