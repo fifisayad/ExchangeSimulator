@@ -150,11 +150,14 @@ class PositionsOrchestrationEngine(BaseEngine):
             f"closing partially position with id: {position.id} by order with id: {order.id}"
         )
         position.close_price = order.price
-        position.pnl += PositionHelpers.pnl_value(
-            entry_price=position.entry_price,
-            close_price=order.price,
-            size=order.size,
-            side=position.side,
+        position.pnl += (
+            PositionHelpers.pnl_value(
+                entry_price=position.entry_price,
+                close_price=order.price,
+                size=order.size,
+                side=position.side,
+            )
+            - order.fee
         )
 
         # unlock margin
@@ -194,11 +197,14 @@ class PositionsOrchestrationEngine(BaseEngine):
             f"closing position with id: {position.id} by order with id: {order.id}"
         )
         position.close_price = order.price
-        position.pnl += PositionHelpers.pnl_value(
-            entry_price=position.entry_price,
-            close_price=order.price,
-            size=order.size,
-            side=position.side,
+        position.pnl += (
+            PositionHelpers.pnl_value(
+                entry_price=position.entry_price,
+                close_price=order.price,
+                size=order.size,
+                side=position.side,
+            )
+            - order.fee
         )
         position.status = PositionStatus.CLOSE
 
