@@ -133,6 +133,7 @@ class PositionsOrchestrationEngine(BaseEngine):
         position.margin = PositionHelpers.margin_calc(
             size=position.size, leverage=position.leverage, price=position.entry_price
         )
+        position.pnl -= order.fee
         LOGGER.debug(
             f"order:{order.to_dict()} is merged with position: {position.to_dict()}"
         )
@@ -256,7 +257,7 @@ class PositionsOrchestrationEngine(BaseEngine):
             position_schema.size, position_schema.leverage, position_schema.entry_price
         )
         position = await self.position_service.create(position_schema)
-        position.pnl = -(order.fee)
+        position.pnl -= order.fee
         LOGGER.info(
             f"created new position by id:{position.id} by order with id: {order.id}"
         )
