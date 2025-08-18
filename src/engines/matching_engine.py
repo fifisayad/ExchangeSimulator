@@ -35,14 +35,14 @@ class MatchingEngine(BaseEngine):
         self.position_service = PositionService()
         self.leverage_service = LeverageService()
 
-    async def preprocess(self):
+    async def prepare(self):
         await self.mm_service.start()
 
-    async def postprocess(self):
+    async def postpare(self):
         pass
 
     @log_exception()
-    async def process(self):
+    async def execute(self):
         LOGGER.info(f"{self.name} processing is started....")
         while True:
             # get open orders from db
