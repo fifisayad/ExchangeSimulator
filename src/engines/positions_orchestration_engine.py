@@ -43,7 +43,7 @@ class PositionsOrchestrationEngine(BaseEngine):
     async def postprocess(self):
         pass
 
-    @log_exception
+    @log_exception()
     async def process(self):
         LOGGER.info(f"{self.name} processing is started....")
         last_update = GetCurrentTime().get()
