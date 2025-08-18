@@ -2,7 +2,7 @@ import datetime
 import logging
 import traceback
 from typing import List, Optional
-from fifi import singleton, BaseEngine
+from fifi import log_exception, singleton, BaseEngine
 
 from ..common.settings import Setting
 from ..enums.position_status import PositionStatus
@@ -41,28 +41,18 @@ class MatchingEngine(BaseEngine):
     async def postprocess(self):
         pass
 
+    @log_exception()
     async def process(self):
         LOGGER.info(f"{self.name} processing is started....")
         while True:
-            try:
-                # get open orders from db
-                open_orders = await self.order_service.get_open_orders()
+            # get open orders from db
+            open_orders = await self.order_service.get_open_orders()
 
-                # check open orders not empty
-                if not open_orders:
-                    continue
+            # check open orders not empty
+            if not open_orders:
+                continue
 
-                await self.match_open_orders(open_orders=open_orders)
-            except Exception:
-                msg_error = traceback.format_exc()
-                LOGGER.info(f"{self.name} crashed: {msg_error}")
-                with open(
-                    f"{Setting().EXCEPTION_LOGS_PATH}{self.name}.txt", "w+"
-                ) as repofile:
-                    repofile.write(
-                        f"{datetime.datetime.now(datetime.UTC)}: {self.name} crashes: {msg_error}"
-                    )
-                raise
+            await self.match_open_orders(open_orders=open_orders)
 
     async def match_open_orders(self, open_orders: List[Order]):
         trades = await self.mm_service.get_last_trade()
