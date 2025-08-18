@@ -27,7 +27,7 @@ class MatchingEngine(BaseEngine):
     name: str = "matching_engine"
 
     def __init__(self):
-        super().__init__()
+        super().__init__(run_in_process=True)
         self.mm_service = MarketMonitoringService()
         self.portfolio_service = PortfolioService()
         self.balance_service = BalanceService()
@@ -35,14 +35,14 @@ class MatchingEngine(BaseEngine):
         self.position_service = PositionService()
         self.leverage_service = LeverageService()
 
-    async def preprocess(self):
+    async def prepare(self):
         await self.mm_service.start()
 
-    async def postprocess(self):
+    async def postpare(self):
         pass
 
     @log_exception()
-    async def process(self):
+    async def execute(self):
         LOGGER.info(f"{self.name} processing is started....")
         while True:
             # get open orders from db

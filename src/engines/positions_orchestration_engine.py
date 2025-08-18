@@ -29,7 +29,7 @@ class PositionsOrchestrationEngine(BaseEngine):
     name: str = "positions_orchestration_engine"
 
     def __init__(self):
-        super().__init__()
+        super().__init__(run_in_process=True)
         self.order_service = OrderService()
         self.balance_service = BalanceService()
         self.position_service = PositionService()
@@ -37,14 +37,14 @@ class PositionsOrchestrationEngine(BaseEngine):
         self.mm_service = MarketMonitoringService()
         self.processed_orders = set()
 
-    async def preprocess(self):
+    async def prepare(self):
         await self.mm_service.start()
 
-    async def postprocess(self):
+    async def postpare(self):
         pass
 
     @log_exception()
-    async def process(self):
+    async def execute(self):
         LOGGER.info(f"{self.name} processing is started....")
         last_update = GetCurrentTime().get()
         while True:
