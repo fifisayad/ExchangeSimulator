@@ -27,7 +27,7 @@ class MatchingEngine(BaseEngine):
     name: str = "matching_engine"
 
     def __init__(self):
-        super().__init__()
+        super().__init__(run_in_process=True)
         self.mm_service = MarketMonitoringService()
         self.portfolio_service = PortfolioService()
         self.balance_service = BalanceService()

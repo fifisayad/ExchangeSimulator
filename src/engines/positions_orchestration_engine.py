@@ -29,7 +29,7 @@ class PositionsOrchestrationEngine(BaseEngine):
     name: str = "positions_orchestration_engine"
 
     def __init__(self):
-        super().__init__()
+        super().__init__(run_in_process=True)
         self.order_service = OrderService()
         self.balance_service = BalanceService()
         self.position_service = PositionService()
