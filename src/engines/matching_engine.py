@@ -1,10 +1,7 @@
-import datetime
 import logging
-import traceback
 from typing import List, Optional
 from fifi import log_exception, singleton, BaseEngine
 
-from ..common.settings import Setting
 from ..enums.position_status import PositionStatus
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
 from ..enums.market import Market

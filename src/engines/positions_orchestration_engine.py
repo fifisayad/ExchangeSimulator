@@ -1,10 +1,7 @@
-import datetime
 import logging
-import traceback
 from fifi import log_exception, singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 
-from ..common.settings import Setting
 from ..enums.asset import Asset
 from ..enums.position_side import PositionSide
 from ..enums.position_status import PositionStatus
