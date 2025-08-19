@@ -13,7 +13,7 @@ Faker==37.4.0
 fastapi==0.116.1
 fastapi-cli==0.0.8
 fastapi-cloud-cli==0.1.4
-fificore==0.0.21
+fificore==0.0.25
 greenlet==3.2.2
 gunicorn==23.0.0
 h11==0.16.0
@@ -41,7 +41,7 @@ pytest-asyncio==1.0.0
 python-dotenv==1.1.0
 python-multipart==0.0.20
 PyYAML==6.0.2
-redis==6.2.0
+redis==5.3.1
 rich==14.0.0
 rich-toolkit==0.14.8
 rignore==0.6.4
@@ -61,3 +61,16 @@ uvicorn==0.35.0
 uvloop==0.21.0
 watchfiles==1.1.0
 websockets==15.0.1
+cffi==1.17.1
+cryptography==45.0.6
+hiredis==3.2.1
+more-itertools==10.7.0
+pycparser==2.22
+PyJWT==2.10.1
+python-ulid==1.1.0
+redis-om==0.3.5
+setuptools==80.9.0
+types-cffi==1.17.0.20250809
+types-pyOpenSSL==24.1.0.20240722
+types-redis==4.6.0.20241004
+types-setuptools==80.9.0.20250809
