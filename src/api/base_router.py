@@ -2,6 +2,8 @@ from fastapi import APIRouter, FastAPI
 from contextlib import asynccontextmanager
 
 from fifi import DatabaseProvider
+
+from ..services import MarketMonitoringService
 from ..engines.matching_engine import MatchingEngine
 from ..engines.positions_orchestration_engine import PositionsOrchestrationEngine
 from ..common.settings import Setting
@@ -15,6 +17,7 @@ setting = Setting()
 async def lifespan(app: FastAPI):
     # initialize
     await DatabaseProvider().init_models()
+    await MarketMonitoringService().start()
     await MatchingEngine().start()
     await PositionsOrchestrationEngine().start()
     yield
