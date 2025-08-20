@@ -35,6 +35,9 @@ class PositionsOrchestrationEngine(BaseEngine):
         self.processed_orders = set()
 
     async def prepare(self):
+        # singleton not compatible with new process we have to create new instance
+        MarketMonitoringService.instance = None
+        self.mm_service = MarketMonitoringService()
         await self.mm_service.start()
 
     async def postpare(self):
