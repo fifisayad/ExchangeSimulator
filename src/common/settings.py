@@ -31,7 +31,7 @@ class Setting(BaseSettings):
 
     # Market Monitoring Settings
     MM_API_PATH: str = "localhost:3456/"
-    MM_SUBSCRIPTION_PATH: str = "subscribe/"
+    MM_SUBSCRIPTION_PATH: str = "subscribe/market"
     MM_EXCHANGE: Exchange = Exchange.HYPERLIQUID
 
     # Logs Path
