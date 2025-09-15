@@ -175,7 +175,7 @@ class MatchingEngine(BaseEngine):
         self,
         market: Market,
         portfolio_id: str,
-        price: Optional[float],
+        price: float,
         size: float,
         side: OrderSide,
         order_type: OrderType,
@@ -188,15 +188,16 @@ class MatchingEngine(BaseEngine):
         order_schema = OrderSchema(
             portfolio_id=portfolio_id,
             market=market,
-            price=price if price else 0,
+            price=price,
             size=size,
             fee=0,
             side=side,
             type=order_type,
         )
 
-        if order_type == OrderType.MARKET:
-            order_schema.price = await self.mm_service.get_last_trade(market=market)
+        # fill market order with incoming price
+        # if order_type == OrderType.MARKET:
+        #     order_schema.price = await self.mm_service.get_last_trade(market=market)
 
         payment_asset = OrderHelper.get_payment_asset(market=market, side=side)
         checked_open_position = False

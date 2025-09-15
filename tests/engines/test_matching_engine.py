@@ -312,20 +312,16 @@ class TestMatchingEngine:
         self,
         database_provider_test,
     ):
-        with patch.object(
-            self.matching_engine.mm_service, "get_last_trade", return_value=1100
-        ) as mock_trade:
-            portfolio = await self.create_fake_portfolio()
-            await self.create_fake_balances(portfolio_id=portfolio.id)
-            order = await self.matching_engine.create_order(
-                portfolio_id=portfolio.id,
-                market=Market.BTCUSD,
-                price=1000,
-                size=0.25,
-                side=OrderSide.BUY,
-                order_type=OrderType.MARKET,
-            )
-            mock_trade.assert_called_once_with(market=Market.BTCUSD)
+        portfolio = await self.create_fake_portfolio()
+        await self.create_fake_balances(portfolio_id=portfolio.id)
+        order = await self.matching_engine.create_order(
+            portfolio_id=portfolio.id,
+            market=Market.BTCUSD,
+            price=1100,
+            size=0.25,
+            side=OrderSide.BUY,
+            order_type=OrderType.MARKET,
+        )
 
         assert order.price == 1100
         assert order.status == OrderStatus.FILLED
@@ -348,24 +344,20 @@ class TestMatchingEngine:
         self,
         database_provider_test,
     ):
-        with patch.object(
-            self.matching_engine.mm_service, "get_last_trade", return_value=1100
-        ) as mock_trade:
-            portfolio = await self.create_fake_portfolio()
-            leverage = await self.leverage_service.create_or_update_leverage(
-                portfolio_id=portfolio.id, market=Market.BTCUSD_PERP, leverage=2
-            )
-            assert leverage is not None
-            await self.create_fake_balances(portfolio_id=portfolio.id)
-            order = await self.matching_engine.create_order(
-                portfolio_id=portfolio.id,
-                market=Market.BTCUSD_PERP,
-                price=1000,
-                size=0.25,
-                side=OrderSide.BUY,
-                order_type=OrderType.MARKET,
-            )
-            mock_trade.assert_called_once_with(market=Market.BTCUSD_PERP)
+        portfolio = await self.create_fake_portfolio()
+        leverage = await self.leverage_service.create_or_update_leverage(
+            portfolio_id=portfolio.id, market=Market.BTCUSD_PERP, leverage=2
+        )
+        assert leverage is not None
+        await self.create_fake_balances(portfolio_id=portfolio.id)
+        order = await self.matching_engine.create_order(
+            portfolio_id=portfolio.id,
+            market=Market.BTCUSD_PERP,
+            price=1100,
+            size=0.25,
+            side=OrderSide.BUY,
+            order_type=OrderType.MARKET,
+        )
 
         assert order.price == 1100
         assert order.status == OrderStatus.FILLED
