@@ -208,6 +208,47 @@ class TestMatchingEngine:
         assert usd_balance is not None
         assert usd_balance.available == 2000
 
+    async def test_cancel_leverage_order(
+        self,
+        database_provider_test,
+    ):
+        await self.create_fake_balances()
+        await self.balance_service.lock_balance(
+            portfolio_id="iamrich", asset=Asset.USD, locked_qty=30
+        )
+        await self.leverage_service.create_or_update_leverage(
+            portfolio_id="iamrich", market=Market.BTCUSD_PERP, leverage=10
+        )
+        order_schema = OrderSchema(
+            portfolio_id="iamrich",
+            market=Market.BTCUSD_PERP,
+            price=1000,
+            size=0.25,
+            side=OrderSide.BUY,
+            fee=50,
+            type=OrderType.LIMIT,
+            status=OrderStatus.ACTIVE,
+        )
+        order = await self.order_service.create(data=order_schema)
+
+        await self.matching_engine.cancel_order(order_id=order.id)
+
+        updated_order = await self.order_service.read_by_id(id_=order.id)
+        assert updated_order is not None
+        assert updated_order.status == OrderStatus.CANCELED
+
+        btc_balance = await self.balance_service.read_by_asset(
+            portfolio_id="iamrich", asset=Asset.BTC
+        )
+        assert btc_balance is not None
+        assert btc_balance.available == 0.05
+
+        usd_balance = await self.balance_service.read_by_asset(
+            portfolio_id="iamrich", asset=Asset.USD
+        )
+        assert usd_balance is not None
+        assert usd_balance.available == 1995
+
     async def test_cancel_order_sucess_story(
         self,
         database_provider_test,
