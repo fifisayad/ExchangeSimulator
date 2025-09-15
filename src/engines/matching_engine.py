@@ -75,14 +75,8 @@ class MatchingEngine(BaseEngine):
             raise InvalidOrder(f"this {order_id=} is {order.status}!!!")
         order.status = OrderStatus.CANCELED
 
-        payment_asset = OrderHelper.get_payment_asset(
-            market=order.market, side=order.side
-        )
-        payment_total = OrderHelper.get_order_payment_asset_total(
-            market=order.market, price=order.price, size=order.size, side=order.side
-        )
-
         is_close_order = False
+        leverage = 1
         if order.market.is_perptual():
             is_close_order = await self.perpetual_open_position_check(
                 market=order.market,
@@ -90,6 +84,22 @@ class MatchingEngine(BaseEngine):
                 size=order.size,
                 side=order.side,
             )
+            leverage = (
+                await self.leverage_service.get_portfolio_market_leverage_value(
+                    portfolio_id=order.portfolio_id, market=order.market
+                )
+                or leverage
+            )
+        payment_asset = OrderHelper.get_payment_asset(
+            market=order.market, side=order.side
+        )
+        payment_total = OrderHelper.get_order_payment_asset_total(
+            market=order.market,
+            price=order.price,
+            size=order.size,
+            side=order.side,
+            leverage=leverage,
+        )
         if not is_close_order:
             await self.balance_service.unlock_balance(
                 portfolio_id=order.portfolio_id,
