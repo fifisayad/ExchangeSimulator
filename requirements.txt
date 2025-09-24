@@ -13,7 +13,7 @@ Faker==37.4.0
 fastapi==0.116.1
 fastapi-cli==0.0.8
 fastapi-cloud-cli==0.1.4
-fificore==0.0.25
+fificore==0.0.28
 greenlet==3.2.2
 gunicorn==23.0.0
 h11==0.16.0
