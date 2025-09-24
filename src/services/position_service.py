@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, List, Optional
-from fifi import GetLogger, BaseService
+from fifi import BaseService
 
 from ..enums.position_side import PositionSide
 from ..enums.market import Market

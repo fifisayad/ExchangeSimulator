@@ -3,7 +3,7 @@ import asyncio
 import logging
 from typing import Dict, Optional, Union, overload
 from fastapi.encoders import jsonable_encoder
-from fifi import RedisSubscriber, singleton, GetLogger
+from fifi import RedisSubscriber, singleton
 
 from ..enums.data_type import DataType
 from ..schemas.subscritption_schema import SubscriptionRequestSchema

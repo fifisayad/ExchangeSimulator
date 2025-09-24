@@ -1,13 +1,12 @@
 from typing import List, Optional
 import logging
 
-from fifi import GetLogger, BaseService
+from fifi import BaseService
 
 from src.models.balance import Balance
 from src.schemas.balance_schema import BalanceSchema
 
 from ..enums.asset import Asset
-from ..models import Order
 from ..repository import BalanceRepository
 
 

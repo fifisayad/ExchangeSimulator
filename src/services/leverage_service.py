@@ -1,5 +1,5 @@
 from typing import Optional
-from fifi import GetLogger, BaseService
+from fifi import BaseService
 import logging
 
 
