@@ -1,9 +1,9 @@
 from fifi import DatetimeDecoratedBase
+from fifi.enums import PositionSide, PositionStatus
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ..enums.position_side import PositionSide
-from ..enums.position_status import PositionStatus
 from ..enums.market import Market
 
 
