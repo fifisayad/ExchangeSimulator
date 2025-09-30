@@ -2,14 +2,11 @@ from typing import List, Union
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
-from ...schemas.position_schema import (
-    PositionResponseSchema,
-)
+from fifi.enums import PositionSide, PositionStatus, Market
+
 from .deps import get_position_service
 from ...services import PositionService
-from ...enums.position_side import PositionSide
-from ...enums.position_status import PositionStatus
-from ...enums.market import Market
+from ...schemas.position_schema import PositionResponseSchema
 
 
 @asynccontextmanager

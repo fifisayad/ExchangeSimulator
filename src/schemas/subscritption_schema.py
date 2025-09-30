@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 
-from ..enums.market import Market
-from ..enums.data_type import DataType
-from ..enums.exchange import Exchange
+from fifi.enums import Exchange, DataType, Market
 
 
 class SubscriptionRequestSchema(BaseModel):

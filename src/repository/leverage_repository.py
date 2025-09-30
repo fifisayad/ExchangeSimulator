@@ -1,11 +1,12 @@
 from typing import List, Optional
-from fifi import db_async_session
-from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fifi import db_async_session
+from fifi.exceptions import NotExistedSessionException
+from fifi.enums import Market
+
 from ..models.leverage import Leverage
-from ..enums.market import Market
 from .simulator_base_repository import SimulatorBaseRepository
 
 

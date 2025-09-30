@@ -1,15 +1,14 @@
-import logging
 from typing import Dict, List, Optional
-from fifi import BaseService
 
-from ..enums.position_side import PositionSide
-from ..enums.market import Market
-from ..enums.position_status import PositionStatus
+from fifi import BaseService
+from fifi.enums import PositionSide, PositionStatus, Market
+from fifi.helpers.get_logger import LoggerFactory
+
 from ..models import Position
 from ..repository import PositionRepository
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 class PositionService(BaseService):

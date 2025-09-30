@@ -1,26 +1,26 @@
+import pytest
+
 from typing import Tuple
 from unittest.mock import patch
-from fifi import GetLogger
-import pytest
-import logging
+from fifi.helpers.get_logger import LoggerFactory
+from fifi.enums import (
+    Asset,
+    OrderSide,
+    OrderStatus,
+    PositionSide,
+    PositionStatus,
+    Market,
+)
 
-from src.enums.asset import Asset
-from src.enums.market import Market
-from src.enums.order_side import OrderSide
-from src.enums.order_status import OrderStatus
-from src.enums.position_side import PositionSide
-from src.enums.position_status import PositionStatus
 from src.helpers.position_helpers import PositionHelpers
 from src.models.leverage import Leverage
 from src.models.order import Order
-from src.models.position import Position
 from src.schemas.order_schema import OrderSchema
-from src.schemas.position_schema import PositionSchema
 from src.services import *
 from src.engines.positions_orchestration_engine import PositionsOrchestrationEngine
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.mark.asyncio

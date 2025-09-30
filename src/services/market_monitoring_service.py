@@ -1,18 +1,18 @@
 import httpx
 import asyncio
-import logging
 from typing import Dict, Optional, Union, overload
 from fastapi.encoders import jsonable_encoder
-from fifi import RedisSubscriber, singleton
 
-from ..enums.data_type import DataType
+from fifi import RedisSubscriber, singleton
+from fifi.enums import DataType, Market
+from fifi.helpers.get_logger import LoggerFactory
+
 from ..schemas.subscritption_schema import SubscriptionRequestSchema
 from ..common.exceptions import APIError
-from ..enums.market import Market
 from ..common.settings import Setting
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @singleton

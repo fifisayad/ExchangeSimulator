@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 
-from ..enums.market import Market
-from ..enums.position_side import PositionSide
-from ..enums.position_status import PositionStatus
+from fifi.enums import PositionSide, PositionStatus, Market
 
 
 class PositionSchema(BaseModel):

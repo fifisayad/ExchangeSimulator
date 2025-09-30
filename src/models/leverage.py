@@ -1,8 +1,7 @@
 from fifi import DatetimeDecoratedBase
+from fifi.enums import Market
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from ..enums.market import Market
 
 
 class Leverage(DatetimeDecoratedBase):

@@ -2,14 +2,14 @@ from typing import List, Union
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
-from src.enums.asset import Asset
+from fifi.enums import Asset
 
+from .deps import get_balance_service, get_portfolio_service
+from ...services import BalanceService, PortfolioService
 from ...schemas.balance_schema import (
     BalanceDepositSchema,
     BalanceResponseSchema,
 )
-from .deps import get_balance_service, get_portfolio_service
-from ...services import BalanceService, PortfolioService
 
 
 @asynccontextmanager

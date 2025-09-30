@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import List, Optional
-from fifi import db_async_session
-from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import Text, and_, cast, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fifi.enums import OrderStatus
+from fifi import db_async_session
+from fifi.exceptions import NotExistedSessionException
+
 from .simulator_base_repository import SimulatorBaseRepository
-from ..enums.order_status import OrderStatus
 from ..models.order import Order
 
 

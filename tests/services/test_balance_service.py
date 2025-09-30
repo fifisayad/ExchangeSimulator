@@ -1,12 +1,13 @@
 import pytest
-import logging
+
+from fifi.helpers.get_logger import LoggerFactory
 
 from src.models.balance import Balance
 from src.services import BalanceService
 from tests.materials import *
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.mark.asyncio

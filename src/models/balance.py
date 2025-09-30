@@ -1,8 +1,8 @@
 from fifi import DatetimeDecoratedBase
+from fifi.enums import Asset
+
 from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from ..enums.asset import Asset
 
 
 class Balance(DatetimeDecoratedBase):

@@ -1,10 +1,9 @@
 from typing import Annotated
 from dotenv import load_dotenv
 from fifi import singleton
+from fifi.enums import Market, Exchange
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode
-from ..enums.market import Market
-from ..enums.exchange import Exchange
 
 
 @singleton
@@ -30,9 +29,10 @@ class Setting(BaseSettings):
     API_VERSION: str = "v1"
 
     # Market Monitoring Settings
-    MM_API_PATH: str = "localhost:3456/"
+    MM_API_PATH: str = "http://localhost:3456/"
     MM_SUBSCRIPTION_PATH: str = "subscribe/market"
     MM_EXCHANGE: Exchange = Exchange.HYPERLIQUID
 
     # Logs Path
+    LOG_LEVEL: str = "INFO"
     EXCEPTION_LOGS_PATH: str = "./logs/"

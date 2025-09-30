@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
-from ...schemas.leverage_schema import LeverageSchema
+from fifi.enums import Market
+
 from .deps import get_leverage_service
+from ...schemas.leverage_schema import LeverageSchema
 from ...services import LeverageService
-from ...enums.market import Market
 
 
 @asynccontextmanager

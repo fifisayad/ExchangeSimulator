@@ -1,8 +1,9 @@
 from typing import Generic, List, Optional, TypeVar
-from fifi import DecoratedBase, Repository, db_async_session
-from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from fifi import DecoratedBase, Repository, db_async_session
+from fifi.exceptions import NotExistedSessionException
 
 EntityModel = TypeVar("EntityModel", bound=DecoratedBase)
 

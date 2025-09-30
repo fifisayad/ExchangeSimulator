@@ -1,20 +1,14 @@
-import coloredlogs
-import logging
 import traceback
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fifi.helpers.get_logger import LoggerFactory
+
 from src import Setting, base_router
 
 
-coloredlogs.install()
-LOGGER = logging.getLogger(__name__)
-name_to_level = logging.getLevelNamesMapping()
-logging.basicConfig(
-    level=name_to_level["INFO"],
-    format="[%(asctime)s] [%(levelname)s] [%(funcName)s] %(message)s",
-)
-
 setting = Setting()
+LOGGER = LoggerFactory(setting.LOG_LEVEL).get(__name__)
 
 # Create fastapi server
 app = FastAPI(

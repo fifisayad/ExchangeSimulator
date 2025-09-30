@@ -1,22 +1,20 @@
-import logging
-from typing import List, Optional
-from fifi import log_exception, singleton, BaseEngine
+from typing import List
 
-from ..enums.position_status import PositionStatus
+from fifi import log_exception, singleton, BaseEngine
+from fifi.enums import Market, PositionStatus, OrderSide, OrderStatus, OrderType
+from fifi.helpers.get_logger import LoggerFactory
+
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
-from ..enums.market import Market
+from ..schemas.order_schema import OrderSchema
 from ..helpers.order_helper import OrderHelper
 from ..helpers.position_helpers import PositionHelpers
 from ..models.order import Order
-from ..schemas.order_schema import OrderSchema
-from ..enums.order_side import OrderSide
-from ..enums.order_status import OrderStatus
-from ..enums.order_type import OrderType
+
 from ..services import *
 from ..repository import *
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @singleton

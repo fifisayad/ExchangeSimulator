@@ -1,18 +1,18 @@
 import random
 import uuid
-from typing import List
 import pytest
-import logging
+from typing import List
 
-from fifi import GetLogger
+from fifi.helpers.get_logger import LoggerFactory
+from fifi.enums import (
+    Market,
+    Asset,
+    OrderSide,
+    OrderStatus,
+    PositionSide,
+    PositionStatus,
+)
 from faker import Faker
-
-from src.enums.asset import Asset
-from src.enums.market import Market
-from src.enums.order_side import OrderSide
-from src.enums.order_status import OrderStatus
-from src.enums.position_side import PositionSide
-from src.enums.position_status import PositionStatus
 from src.schemas import PortfolioSchema, BalanceSchema, OrderSchema, LeverageSchema
 from src.common.settings import Setting
 from src.schemas.position_schema import PositionSchema
@@ -20,7 +20,7 @@ from src.schemas.position_schema import PositionSchema
 
 fake = Faker()
 setting = Setting()
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.fixture

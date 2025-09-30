@@ -1,14 +1,13 @@
 from typing import List, Optional
-from fifi import db_async_session
-from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fifi import db_async_session
+from fifi.exceptions import NotExistedSessionException
+from fifi.enums import PositionSide, PositionStatus, Market
+
 from .simulator_base_repository import SimulatorBaseRepository
 from ..models.position import Position
-from ..enums.position_side import PositionSide
-from ..enums.market import Market
-from ..enums.position_status import PositionStatus
 
 
 class PositionRepository(SimulatorBaseRepository):

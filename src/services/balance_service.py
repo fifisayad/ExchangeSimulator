@@ -1,16 +1,16 @@
 from typing import List, Optional
-import logging
 
+from fifi.helpers.get_logger import LoggerFactory
 from fifi import BaseService
+from fifi.enums import Asset
 
 from src.models.balance import Balance
 from src.schemas.balance_schema import BalanceSchema
 
-from ..enums.asset import Asset
 from ..repository import BalanceRepository
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 class BalanceService(BaseService):

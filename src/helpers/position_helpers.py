@@ -1,5 +1,5 @@
-from ..enums.order_side import OrderSide
-from ..enums.position_side import PositionSide
+from fifi.enums import OrderSide, PositionSide
+
 from ..models import Order, Position
 
 

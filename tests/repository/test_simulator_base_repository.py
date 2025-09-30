@@ -1,8 +1,9 @@
 import pytest
 
+from fifi.enums import Asset
+
 from src.models import Position
 from src.repository import PositionRepository
-from src.enums.asset import Asset
 from tests.materials import *
 
 

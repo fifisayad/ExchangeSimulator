@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List, Optional
-from fifi import BaseService
 
-from ..enums.order_status import OrderStatus
+from fifi import BaseService
+from fifi.enums import OrderStatus
+
 from ..repository import OrderRepository
 from ..models import Order
 

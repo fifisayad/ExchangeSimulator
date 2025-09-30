@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from src.enums.market import Market
+from fifi.enums import Market
 
 
 class LeverageSchema(BaseModel):
