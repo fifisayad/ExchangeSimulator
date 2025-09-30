@@ -11,3 +11,4 @@ services:
     ports:
       - "1889:1889"
     entrypoint: ["/bin/sh", "-c", "exec ./run.sh"]
+    tty: true
