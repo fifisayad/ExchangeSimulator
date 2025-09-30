@@ -1,6 +1,7 @@
 from typing import Optional
+
 from fifi import BaseService
-import logging
+from fifi.helpers.get_logger import LoggerFactory
 
 
 from ..enums.market import Market
@@ -8,7 +9,7 @@ from ..models import Leverage
 from ..repository import LeverageRepository
 from ..schemas import LeverageSchema
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 class LeverageService(BaseService):
