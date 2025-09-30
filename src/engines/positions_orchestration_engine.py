@@ -1,10 +1,8 @@
-import logging
 from fifi import log_exception, singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
+from fifi.enums import Asset, PositionSide, PositionStatus
+from fifi.helpers.get_logger import LoggerFactory
 
-from ..enums.asset import Asset
-from ..enums.position_side import PositionSide
-from ..enums.position_status import PositionStatus
 from ..helpers.position_helpers import PositionHelpers
 from ..models.order import Order
 from ..models.position import Position
@@ -18,7 +16,7 @@ from ..services import (
 )
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @singleton
