@@ -1,10 +1,11 @@
 from typing import List, Optional
-from fifi import db_async_session
-from fifi.exceptions import NotExistedSessionException
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..enums.asset import Asset
+from fifi.enums import Asset
+from fifi import db_async_session
+from fifi.exceptions import NotExistedSessionException
+
 from .simulator_base_repository import SimulatorBaseRepository
 from ..models.balance import Balance
 
