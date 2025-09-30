@@ -2,7 +2,7 @@ from typing import List, Union
 from fastapi import APIRouter, Depends, FastAPI, HTTPException
 from contextlib import asynccontextmanager
 
-from src.enums.asset import Asset
+from fifi.enums import Asset
 
 from ...schemas.balance_schema import (
     BalanceDepositSchema,
