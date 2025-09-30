@@ -1,10 +1,11 @@
 import pytest
-import logging
+
 from unittest.mock import patch
+from fifi.helpers.get_logger import LoggerFactory
+from fifi.enums import OrderType
 
 from src.common.exceptions import InvalidOrder, NotFoundOrder
 from src.engines.matching_engine import MatchingEngine
-from src.enums.order_type import OrderType
 from src.models.order import Order
 from src.models.portfolio import Portfolio
 from src.schemas.position_schema import PositionSchema
@@ -18,7 +19,7 @@ from src.services import (
 from tests.materials import *
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.mark.asyncio

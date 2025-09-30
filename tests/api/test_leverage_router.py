@@ -1,6 +1,6 @@
-from fifi import GetLogger
 import pytest
-import logging
+
+from fifi import LoggerFactory
 from unittest.mock import patch
 from httpx import ASGITransport, AsyncClient
 from main import app
@@ -9,7 +9,7 @@ from src.services.leverage_service import LeverageService
 from tests.materials import *
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.mark.asyncio

@@ -1,9 +1,11 @@
 import pytest
 
+from fifi.enums import Asset
+
 from src.repository import PortfolioRepository
 from src.repository import BalanceRepository
 from src.repository import OrderRepository
-from src.enums.asset import Asset
+
 from tests.materials import *
 
 

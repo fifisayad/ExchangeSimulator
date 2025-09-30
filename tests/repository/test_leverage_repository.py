@@ -1,8 +1,9 @@
-from fifi.exceptions import IntegrityConflictException
 import pytest
 
+from fifi.exceptions import IntegrityConflictException
+from fifi.enums import Market
+
 from src.repository import LeverageRepository
-from src.enums.market import Market
 from tests.materials import *
 
 

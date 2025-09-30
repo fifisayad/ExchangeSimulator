@@ -1,16 +1,16 @@
-from fifi import GetLogger
 import pytest
-import logging
+
 from unittest.mock import patch
 from httpx import ASGITransport, AsyncClient
 from main import app
 from fastapi.encoders import jsonable_encoder
+from fifi import LoggerFactory
 
 from src.services import PositionService
 from src.schemas.position_schema import PositionResponseSchema
 from tests.materials import *
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.mark.asyncio

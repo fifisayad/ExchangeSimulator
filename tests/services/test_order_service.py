@@ -1,13 +1,14 @@
-from fifi.helpers.get_current_time import GetCurrentTime
 import pytest
-import logging
+
+from fifi.helpers.get_current_time import GetCurrentTime
+from fifi.helpers.get_logger import LoggerFactory
 
 from src.models import Order
 from src.services import OrderService
 from tests.materials import *
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = LoggerFactory().get(__name__)
 
 
 @pytest.mark.asyncio
