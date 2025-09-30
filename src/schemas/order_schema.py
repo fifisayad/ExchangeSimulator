@@ -1,9 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 
-from ..enums.order_status import OrderStatus
-from ..enums.order_side import OrderSide
-from ..enums.order_type import OrderType
+from fifi.enums import OrderSide, OrderStatus, OrderType
 from ..enums.market import Market
 
 

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from src.enums.asset import Asset
+from fifi.enums import Asset
 
 
 class BalanceSchema(BaseModel):
