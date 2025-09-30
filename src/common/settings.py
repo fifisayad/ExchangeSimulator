@@ -30,9 +30,10 @@ class Setting(BaseSettings):
     API_VERSION: str = "v1"
 
     # Market Monitoring Settings
-    MM_API_PATH: str = "localhost:3456/"
+    MM_API_PATH: str = "http://localhost:3456/"
     MM_SUBSCRIPTION_PATH: str = "subscribe/market"
     MM_EXCHANGE: Exchange = Exchange.HYPERLIQUID
 
     # Logs Path
+    LOG_LEVEL: str = "INFO"
     EXCEPTION_LOGS_PATH: str = "./logs/"
