@@ -4,11 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from fifi import db_async_session
 from fifi.exceptions import NotExistedSessionException
-from fifi.enums import PositionSide, PositionStatus
+from fifi.enums import PositionSide, PositionStatus, Market
 
 from .simulator_base_repository import SimulatorBaseRepository
 from ..models.position import Position
-from ..enums.market import Market
 
 
 class PositionRepository(SimulatorBaseRepository):

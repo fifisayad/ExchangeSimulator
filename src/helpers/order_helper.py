@@ -1,7 +1,6 @@
-from fifi.enums import OrderType, OrderSide, Asset
+from fifi.enums import OrderType, OrderSide, Asset, Market
 
 from ..models import Portfolio
-from ..enums.market import Market
 
 
 class OrderHelper:

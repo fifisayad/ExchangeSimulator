@@ -1,10 +1,8 @@
 from fifi import DatetimeDecoratedBase
-from fifi.enums import OrderSide, OrderStatus, OrderType
+from fifi.enums import OrderSide, OrderStatus, OrderType, Market
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from ..enums.market import Market
 
 
 class Order(DatetimeDecoratedBase):

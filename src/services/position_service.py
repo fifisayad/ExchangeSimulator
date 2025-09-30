@@ -1,9 +1,9 @@
 from typing import Dict, List, Optional
 
 from fifi import BaseService
-from fifi.enums import PositionSide, PositionStatus
+from fifi.enums import PositionSide, PositionStatus, Market
 from fifi.helpers.get_logger import LoggerFactory
-from ..enums.market import Market
+
 from ..models import Position
 from ..repository import PositionRepository
 

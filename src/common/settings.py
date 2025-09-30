@@ -1,10 +1,9 @@
 from typing import Annotated
 from dotenv import load_dotenv
 from fifi import singleton
+from fifi.enums import Market, Exchange
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, NoDecode
-from ..enums.market import Market
-from ..enums.exchange import Exchange
 
 
 @singleton

@@ -1,11 +1,11 @@
 from typing import List
 
 from fifi import log_exception, singleton, BaseEngine
-from fifi.enums import PositionStatus, OrderSide, OrderStatus, OrderType
+from fifi.enums import Market, PositionStatus, OrderSide, OrderStatus, OrderType
 from fifi.helpers.get_logger import LoggerFactory
 
 from ..common.exceptions import InvalidOrder, NotEnoughBalance, NotFoundOrder
-from ..enums.market import Market
+from ..schemas.order_schema import OrderSchema
 from ..helpers.order_helper import OrderHelper
 from ..helpers.position_helpers import PositionHelpers
 from ..models.order import Order

@@ -4,12 +4,12 @@ from contextlib import asynccontextmanager
 
 from fifi.enums import Asset
 
+from .deps import get_balance_service, get_portfolio_service
+from ...services import BalanceService, PortfolioService
 from ...schemas.balance_schema import (
     BalanceDepositSchema,
     BalanceResponseSchema,
 )
-from .deps import get_balance_service, get_portfolio_service
-from ...services import BalanceService, PortfolioService
 
 
 @asynccontextmanager

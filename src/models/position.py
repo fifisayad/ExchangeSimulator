@@ -1,10 +1,8 @@
 from fifi import DatetimeDecoratedBase
-from fifi.enums import PositionSide, PositionStatus
+from fifi.enums import PositionSide, PositionStatus, Market
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from ..enums.market import Market
 
 
 class Position(DatetimeDecoratedBase):

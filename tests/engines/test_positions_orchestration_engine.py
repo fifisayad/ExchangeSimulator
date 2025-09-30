@@ -3,9 +3,15 @@ import pytest
 from typing import Tuple
 from unittest.mock import patch
 from fifi.helpers.get_logger import LoggerFactory
-from fifi.enums import Asset, OrderSide, OrderStatus, PositionSide, PositionStatus
+from fifi.enums import (
+    Asset,
+    OrderSide,
+    OrderStatus,
+    PositionSide,
+    PositionStatus,
+    Market,
+)
 
-from src.enums.market import Market
 from src.helpers.position_helpers import PositionHelpers
 from src.models.leverage import Leverage
 from src.models.order import Order

@@ -2,9 +2,8 @@ from typing import Optional
 
 from fifi import BaseService
 from fifi.helpers.get_logger import LoggerFactory
+from fifi.enums import Market
 
-
-from ..enums.market import Market
 from ..models import Leverage
 from ..repository import LeverageRepository
 from ..schemas import LeverageSchema
