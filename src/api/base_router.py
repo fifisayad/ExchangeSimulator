@@ -17,9 +17,8 @@ setting = Setting()
 async def lifespan(app: FastAPI):
     # initialize
     await DatabaseProvider().init_models()
-    await MarketMonitoringService().start()
-    await MatchingEngine().start()
-    await PositionsOrchestrationEngine().start()
+    MatchingEngine().start()
+    PositionsOrchestrationEngine().start()
     yield
     # cleanup
     await MatchingEngine().stop()
