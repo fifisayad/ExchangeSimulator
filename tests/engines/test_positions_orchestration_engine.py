@@ -132,6 +132,7 @@ class TestPositionsOrchestrationEngine:
         assert updated_position is not None
         assert updated_position.status == PositionStatus.CLOSE
         assert updated_position.pnl == 50
+        assert updated_position.closed_size == 0.5
         assert updated_position.close_price == order.price
 
         updated_balance = await self.balance_service.read_by_asset(
@@ -178,6 +179,8 @@ class TestPositionsOrchestrationEngine:
         assert updated_position.status == PositionStatus.OPEN
         assert updated_position.pnl == 25
         assert updated_position.margin == 125
+        assert updated_position.closed_size == 0.25
+        assert updated_position.size == 0.5
         assert updated_position.close_price == order.price
 
         updated_balance = await self.balance_service.read_by_asset(
@@ -223,6 +226,8 @@ class TestPositionsOrchestrationEngine:
         assert updated_position is not None
         assert updated_position.status == PositionStatus.OPEN
         assert updated_position.pnl == 0
+        assert updated_position.size == 0.6
+        assert updated_position.closed_size == 0
         entry_price = ((1000 * 0.5) + (1100 * 0.1)) / 0.6
         assert updated_position.entry_price == entry_price
         assert updated_position.lqd_price == entry_price - (
