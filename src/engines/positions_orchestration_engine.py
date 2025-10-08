@@ -145,9 +145,11 @@ class PositionsOrchestrationEngine(BaseEngine):
 
         # unlock margin
         last_position_margin = position.margin
-        position.size -= order.size
+        position.closed_size += order.size
         position.margin = PositionHelpers.margin_calc(
-            size=position.size, leverage=position.leverage, price=position.entry_price
+            size=position.size - position.closed_size,
+            leverage=position.leverage,
+            price=position.entry_price,
         )
         LOGGER.debug(
             f"{position.id=} margin was {last_position_margin=} and it's now {position.margin=}"
@@ -187,6 +189,7 @@ class PositionsOrchestrationEngine(BaseEngine):
             side=position.side,
         )
         position.status = PositionStatus.CLOSE
+        position.closed_size = position.size
 
         # unlock margin
         is_unlocked = await self.balance_service.unlock_balance(

@@ -18,6 +18,7 @@ class Position(DatetimeDecoratedBase):
     lqd_price: Mapped[float] = mapped_column(nullable=False)
     pnl: Mapped[float] = mapped_column(default=0, nullable=False)
     size: Mapped[float] = mapped_column(nullable=False)
+    closed_size: Mapped[float] = mapped_column(default=0, nullable=False)
     margin: Mapped[float] = mapped_column(nullable=False)
     status: Mapped[PositionStatus] = mapped_column(
         default=PositionStatus.OPEN, nullable=False

@@ -26,5 +26,6 @@ class PositionResponseSchema(BaseModel):
     lqd_price: float
     pnl: float
     size: float
+    closed_size: float
     leverage: float
     margin: float
