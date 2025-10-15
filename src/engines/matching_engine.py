@@ -209,8 +209,8 @@ class MatchingEngine(BaseEngine):
         )
 
         # fill market order with incoming price
-        # if order_type == OrderType.MARKET:
-        #     order_schema.price = await self.mm_service.get_last_trade(market=market)
+        if order_type == OrderType.MARKET:
+            order_schema.price = self.mm_repo.get_last_trade(market=market)
 
         payment_asset = OrderHelper.get_payment_asset(market=market, side=side)
         checked_open_position = False
