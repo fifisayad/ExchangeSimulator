@@ -9,7 +9,13 @@ services:
       - .env:/app/.env
       - ./logs/:/app/logs
     ports:
-      - "1889:1889"
+      - "127.0.0.1:1889:1889"
     entrypoint: ["/bin/sh", "-c", "exec ./run.sh"]
     tty: true
     ipc: host
+    networks:
+      - epicure
+
+networks:
+  epicure:
+    external: true
