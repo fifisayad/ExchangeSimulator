@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 
 from fifi import DatabaseProvider
 
-from ..services import MarketMonitoringService
 from ..engines.matching_engine import MatchingEngine
 from ..engines.positions_orchestration_engine import PositionsOrchestrationEngine
 from ..common.settings import Setting
@@ -21,8 +20,8 @@ async def lifespan(app: FastAPI):
     PositionsOrchestrationEngine().start()
     yield
     # cleanup
-    await MatchingEngine().stop()
-    await PositionsOrchestrationEngine().stop()
+    MatchingEngine().stop()
+    PositionsOrchestrationEngine().stop()
 
 
 base_router = APIRouter(tags=["ExchangeAPIs"], lifespan=lifespan)

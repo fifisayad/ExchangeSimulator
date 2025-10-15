@@ -1,4 +1,4 @@
-from fifi import log_exception, singleton, BaseEngine
+from fifi import MonitoringSHMRepository, log_exception, singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
 from fifi.enums import Asset, PositionSide, PositionStatus
 from fifi.helpers.get_logger import LoggerFactory
@@ -8,10 +8,10 @@ from ..models.order import Order
 from ..models.position import Position
 from ..schemas.position_schema import PositionSchema
 from ..services.leverage_service import LeverageService
+from ..common.settings import Setting
 from ..services import (
     OrderService,
     BalanceService,
-    MarketMonitoringService,
     PositionService,
 )
 
@@ -25,21 +25,20 @@ class PositionsOrchestrationEngine(BaseEngine):
 
     def __init__(self):
         super().__init__(run_in_process=True)
+        self.setting = Setting()
         self.order_service = OrderService()
         self.balance_service = BalanceService()
         self.position_service = PositionService()
         self.leverage_service = LeverageService()
-        self.mm_service = MarketMonitoringService()
         self.processed_orders = set()
 
     async def prepare(self):
-        # singleton not compatible with new process we have to create new instance
-        MarketMonitoringService.instance = None
-        self.mm_service = MarketMonitoringService()
-        await self.mm_service.start()
+        self.mm_repo = MonitoringSHMRepository(
+            create=False, markets=self.setting.ACTIVE_MARKETS
+        )
 
     async def postpare(self):
-        pass
+        self.mm_repo.close()
 
     @log_exception()
     async def execute(self):
@@ -69,9 +68,7 @@ class PositionsOrchestrationEngine(BaseEngine):
                     self.processed_orders.add(order.id)
 
             for key, position in open_positions.items():
-                market_last_trade = await self.mm_service.get_last_trade(
-                    market=position.market
-                )
+                market_last_trade = self.mm_repo.get_last_trade(market=position.market)
                 if position.side == PositionSide.LONG:
                     if position.lqd_price < market_last_trade:
                         continue
