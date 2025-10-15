@@ -22,20 +22,33 @@ from tests.materials import *
 LOGGER = LoggerFactory().get(__name__)
 
 
+class MonitoringSHMRepositoryMock:
+    def get_last_trade(self, market):
+        return 1100
+
+
+@pytest.fixture
+def provide_matching_engine():
+    matching_engine = MatchingEngine()
+    matching_engine.mm_repo = MonitoringSHMRepositoryMock()
+    yield matching_engine
+
+
 @pytest.mark.asyncio
 class TestMatchingEngine:
     position_service = PositionService()
     order_service = OrderService()
     balance_service = BalanceService()
     portfolio_service = PortfolioService()
-    matching_engine = MatchingEngine()
     leverage_service = LeverageService()
 
     async def test_perpetual_open_position_check(
         self,
         database_provider_test,
+        provide_matching_engine,
     ):
-        checked = await self.matching_engine.perpetual_open_position_check(
+        matching_engine = provide_matching_engine
+        checked = await matching_engine.perpetual_open_position_check(
             market=Market.BTCUSD_PERP,
             portfolio_id="iamrich",
             side=OrderSide.SELL,
@@ -52,7 +65,7 @@ class TestMatchingEngine:
         )
         position = await self.position_service.create(data=position_schema)
 
-        checked = await self.matching_engine.perpetual_open_position_check(
+        checked = await matching_engine.perpetual_open_position_check(
             market=Market.BTCUSD_PERP,
             portfolio_id="iamrich",
             side=OrderSide.SELL,
@@ -60,7 +73,7 @@ class TestMatchingEngine:
         )
         assert checked
 
-        checked = await self.matching_engine.perpetual_open_position_check(
+        checked = await matching_engine.perpetual_open_position_check(
             market=Market.BTCUSD_PERP,
             portfolio_id="iamrich",
             side=OrderSide.SELL,
@@ -68,7 +81,7 @@ class TestMatchingEngine:
         )
         assert checked
 
-        checked = await self.matching_engine.perpetual_open_position_check(
+        checked = await matching_engine.perpetual_open_position_check(
             market=Market.ETHUSD_PERP,
             portfolio_id="iamrich",
             side=OrderSide.SELL,
@@ -76,7 +89,7 @@ class TestMatchingEngine:
         )
         assert not checked
 
-        checked = await self.matching_engine.perpetual_open_position_check(
+        checked = await matching_engine.perpetual_open_position_check(
             market=Market.BTCUSD_PERP,
             portfolio_id="iamrich",
             side=OrderSide.BUY,
@@ -85,7 +98,7 @@ class TestMatchingEngine:
         assert not checked
 
         with pytest.raises(InvalidOrder):
-            checked = await self.matching_engine.perpetual_open_position_check(
+            checked = await matching_engine.perpetual_open_position_check(
                 market=Market.BTCUSD_PERP,
                 portfolio_id="iamrich",
                 side=OrderSide.SELL,
@@ -101,8 +114,7 @@ class TestMatchingEngine:
         )
 
     async def test_fill_order_sucess_story(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         await self.create_fake_balances()
         await self.balance_service.lock_balance(
@@ -119,7 +131,7 @@ class TestMatchingEngine:
             status=OrderStatus.ACTIVE,
         )
         order = await self.order_service.create(data=order_schema)
-        await self.matching_engine.fill_order(order)
+        await provide_matching_engine.fill_order(order)
 
         updated_order = await self.order_service.read_by_id(id_=order.id)
         assert updated_order is not None
@@ -138,8 +150,7 @@ class TestMatchingEngine:
         assert usd_balance.available == 1700
 
     async def test_fill_order_perpetual_story(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         await self.create_fake_balances()
         await self.balance_service.lock_balance(
@@ -156,7 +167,7 @@ class TestMatchingEngine:
             status=OrderStatus.ACTIVE,
         )
         order = await self.order_service.create(data=order_schema)
-        await self.matching_engine.fill_order(order)
+        await provide_matching_engine.fill_order(order)
 
         updated_order = await self.order_service.read_by_id(id_=order.id)
         assert updated_order is not None
@@ -176,8 +187,7 @@ class TestMatchingEngine:
         assert usd_balance.fee_paid == 50
 
     async def test_fill_order_or_filled(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         await self.create_fake_balances()
         order_schema = OrderSchema(
@@ -191,7 +201,7 @@ class TestMatchingEngine:
             status=OrderStatus.CANCELED,
         )
         order = await self.order_service.create(data=order_schema)
-        await self.matching_engine.fill_order(order)
+        await provide_matching_engine.fill_order(order)
 
         updated_order = await self.order_service.read_by_id(id_=order.id)
         assert updated_order is not None
@@ -210,8 +220,7 @@ class TestMatchingEngine:
         assert usd_balance.available == 2000
 
     async def test_cancel_leverage_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         await self.create_fake_balances()
         await self.balance_service.lock_balance(
@@ -232,7 +241,7 @@ class TestMatchingEngine:
         )
         order = await self.order_service.create(data=order_schema)
 
-        await self.matching_engine.cancel_order(order_id=order.id)
+        await provide_matching_engine.cancel_order(order_id=order.id)
 
         updated_order = await self.order_service.read_by_id(id_=order.id)
         assert updated_order is not None
@@ -251,8 +260,7 @@ class TestMatchingEngine:
         assert usd_balance.available == 1995
 
     async def test_cancel_order_sucess_story(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         await self.create_fake_balances()
         await self.balance_service.lock_balance(
@@ -270,7 +278,7 @@ class TestMatchingEngine:
         )
         order = await self.order_service.create(data=order_schema)
 
-        await self.matching_engine.cancel_order(order_id=order.id)
+        await provide_matching_engine.cancel_order(order_id=order.id)
 
         updated_order = await self.order_service.read_by_id(id_=order.id)
         assert updated_order is not None
@@ -289,15 +297,13 @@ class TestMatchingEngine:
         assert usd_balance.available == 1950
 
     async def test_cancel_order_not_found(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         with pytest.raises(NotFoundOrder):
-            await self.matching_engine.cancel_order(order_id="iampoor")
+            await provide_matching_engine.cancel_order(order_id="iampoor")
 
     async def test_cancel_filled_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         order_schema = OrderSchema(
             portfolio_id="iamrich",
@@ -311,11 +317,10 @@ class TestMatchingEngine:
         )
         order = await self.order_service.create(data=order_schema)
         with pytest.raises(InvalidOrder):
-            await self.matching_engine.cancel_order(order_id=order.id)
+            await provide_matching_engine.cancel_order(order_id=order.id)
 
     async def test_cancel_canceled_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         order_schema = OrderSchema(
             portfolio_id="iamrich",
@@ -329,14 +334,13 @@ class TestMatchingEngine:
         )
         order = await self.order_service.create(data=order_schema)
         with pytest.raises(InvalidOrder):
-            await self.matching_engine.cancel_order(order_id=order.id)
+            await provide_matching_engine.cancel_order(order_id=order.id)
 
     async def test_create_order_wrong_portfolio_id(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         with pytest.raises(InvalidOrder):
-            await self.matching_engine.create_order(
+            await provide_matching_engine.create_order(
                 market=Market.BTCUSD,
                 portfolio_id="ThisShitIsImpossible",
                 price=1234324,
@@ -351,12 +355,11 @@ class TestMatchingEngine:
         )
 
     async def test_create_spot_market_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         portfolio = await self.create_fake_portfolio()
         await self.create_fake_balances(portfolio_id=portfolio.id)
-        order = await self.matching_engine.create_order(
+        order = await provide_matching_engine.create_order(
             portfolio_id=portfolio.id,
             market=Market.BTCUSD,
             price=1100,
@@ -383,8 +386,7 @@ class TestMatchingEngine:
         assert usd_balance.available == 2000 - order.price * order.size
 
     async def test_create_perp_market_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         portfolio = await self.create_fake_portfolio()
         leverage = await self.leverage_service.create_or_update_leverage(
@@ -392,7 +394,7 @@ class TestMatchingEngine:
         )
         assert leverage is not None
         await self.create_fake_balances(portfolio_id=portfolio.id)
-        order = await self.matching_engine.create_order(
+        order = await provide_matching_engine.create_order(
             portfolio_id=portfolio.id,
             market=Market.BTCUSD_PERP,
             price=1100,
@@ -425,15 +427,14 @@ class TestMatchingEngine:
         assert usd_balance.fee_paid == order.fee
 
     async def test_create_spot_limit_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         with patch.object(
-            self.matching_engine.mm_service, "get_last_trade", return_value=1100
+            provide_matching_engine.mm_repo, "get_last_trade", return_value=1100
         ) as mock_trade:
             portfolio = await self.create_fake_portfolio()
             await self.create_fake_balances(portfolio_id=portfolio.id)
-            order = await self.matching_engine.create_order(
+            order = await provide_matching_engine.create_order(
                 portfolio_id=portfolio.id,
                 market=Market.BTCUSD,
                 price=1000,
@@ -462,11 +463,10 @@ class TestMatchingEngine:
         assert usd_balance.frozen == order.price * order.size
 
     async def test_create_perp_limit_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         with patch.object(
-            self.matching_engine.mm_service, "get_last_trade", return_value=1100
+            provide_matching_engine.mm_repo, "get_last_trade", return_value=1100
         ) as mock_trade:
             portfolio = await self.create_fake_portfolio()
             leverage = await self.leverage_service.create_or_update_leverage(
@@ -474,7 +474,7 @@ class TestMatchingEngine:
             )
             assert leverage is not None
             await self.create_fake_balances(portfolio_id=portfolio.id)
-            order = await self.matching_engine.create_order(
+            order = await provide_matching_engine.create_order(
                 portfolio_id=portfolio.id,
                 market=Market.BTCUSD_PERP,
                 price=1000,
@@ -507,8 +507,7 @@ class TestMatchingEngine:
         assert usd_balance.fee_paid == 0
 
     async def test_match_open_orders(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_matching_engine
     ):
         open_orders: List[Order] = list()
         portfolio = await self.create_fake_portfolio()
@@ -516,7 +515,7 @@ class TestMatchingEngine:
         for price in [1000, 1200]:
             for side in [OrderSide.BUY, OrderSide.SELL]:
                 open_orders.append(
-                    await self.matching_engine.create_order(
+                    await provide_matching_engine.create_order(
                         portfolio_id=portfolio.id,
                         market=Market.BTCUSD,
                         price=price,
@@ -526,12 +525,11 @@ class TestMatchingEngine:
                     )
                 )
         with patch.object(
-            self.matching_engine.mm_service,
+            provide_matching_engine.mm_repo,
             "get_last_trade",
-            return_value={Market.BTCUSD: 1100},
+            return_value=1100,
         ) as mock_trade:
-            await self.matching_engine.match_open_orders(open_orders=open_orders)
-            assert mock_trade.call_count == 1
+            await provide_matching_engine.match_open_orders(open_orders=open_orders)
 
             open_orders = await self.order_service.get_open_orders()
             assert len(open_orders) == 2

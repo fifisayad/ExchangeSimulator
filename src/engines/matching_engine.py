@@ -1,6 +1,6 @@
-from typing import List
+from typing import Dict, List
 
-from fifi import log_exception, singleton, BaseEngine
+from fifi import MonitoringSHMRepository, log_exception, singleton, BaseEngine
 from fifi.enums import Market, PositionStatus, OrderSide, OrderStatus, OrderType
 from fifi.helpers.get_logger import LoggerFactory
 
@@ -9,7 +9,7 @@ from ..schemas.order_schema import OrderSchema
 from ..helpers.order_helper import OrderHelper
 from ..helpers.position_helpers import PositionHelpers
 from ..models.order import Order
-
+from ..common.settings import Setting
 from ..services import *
 from ..repository import *
 
@@ -20,10 +20,11 @@ LOGGER = LoggerFactory().get(__name__)
 @singleton
 class MatchingEngine(BaseEngine):
     name: str = "matching_engine"
+    mm_repo: MonitoringSHMRepository
 
     def __init__(self):
         super().__init__(run_in_process=True)
-        self.mm_service = MarketMonitoringService()
+        self.settings = Setting()
         self.portfolio_service = PortfolioService()
         self.balance_service = BalanceService()
         self.order_service = OrderService()
@@ -31,13 +32,12 @@ class MatchingEngine(BaseEngine):
         self.leverage_service = LeverageService()
 
     async def prepare(self):
-        # singleton not compatible with new process we have to create new instance
-        MarketMonitoringService.instance = None
-        self.mm_service = MarketMonitoringService()
-        await self.mm_service.start()
+        self.mm_repo = MonitoringSHMRepository(
+            create=False, markets=self.settings.ACTIVE_MARKETS
+        )
 
     async def postpare(self):
-        pass
+        self.mm_repo.close()
 
     @log_exception()
     async def execute(self):
@@ -53,13 +53,18 @@ class MatchingEngine(BaseEngine):
             await self.match_open_orders(open_orders=open_orders)
 
     async def match_open_orders(self, open_orders: List[Order]):
-        trades = await self.mm_service.get_last_trade()
         for order in open_orders:
             if order.type == OrderType.MARKET:
                 continue
-            elif order.side == OrderSide.BUY and order.price >= trades[order.market]:
+            elif (
+                order.side == OrderSide.BUY
+                and order.price >= self.mm_repo.get_last_trade(order.market)
+            ):
                 await self.fill_order(order)
-            elif order.side == OrderSide.SELL and order.price <= trades[order.market]:
+            elif (
+                order.side == OrderSide.SELL
+                and order.price <= self.mm_repo.get_last_trade(order.market)
+            ):
                 await self.fill_order(order)
             else:
                 continue
