@@ -9,7 +9,7 @@ class Balance(DatetimeDecoratedBase):
     __tablename__ = "balances"
     # columns
     portfolio_id: Mapped[str] = mapped_column(
-        ForeignKey("portfolios.id"), nullable=False
+        ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False
     )
     asset: Mapped[Asset] = mapped_column(nullable=False)
     quantity: Mapped[float] = mapped_column(

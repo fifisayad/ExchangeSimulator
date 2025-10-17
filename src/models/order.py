@@ -9,7 +9,7 @@ class Order(DatetimeDecoratedBase):
     __tablename__ = "orders"
     # columns
     portfolio_id: Mapped[str] = mapped_column(
-        ForeignKey("portfolios.id"), nullable=False
+        ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False
     )
     market: Mapped[Market] = mapped_column(nullable=False)
     fee: Mapped[float] = mapped_column(nullable=False)
