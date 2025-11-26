@@ -23,6 +23,26 @@ from src.engines.positions_orchestration_engine import PositionsOrchestrationEng
 LOGGER = LoggerFactory().get(__name__)
 
 
+class MarketDataRepositoryMock:
+    def __init__(self, market: Market, interval: str) -> None:
+        pass
+
+    def get_last_trade(self):
+        return 1100
+
+
+@pytest.fixture
+def provide_positions_orchestration_engine(monkeypatch):
+    monkeypatch.setattr(
+        "src.engines.positions_orchestration_engine.MarketDataRepository",
+        MarketDataRepositoryMock,
+    )
+    engine = PositionsOrchestrationEngine()
+    for market in Market:
+        engine.md_repos[market] = MarketDataRepositoryMock(market=market, interval="1m")
+    yield engine
+
+
 @pytest.mark.asyncio
 class TestPositionsOrchestrationEngine:
     position_service = PositionService()
@@ -30,7 +50,6 @@ class TestPositionsOrchestrationEngine:
     balance_service = BalanceService()
     portfolio_service = PortfolioService()
     leverage_service = LeverageService()
-    positions_orchestration_engine = PositionsOrchestrationEngine()
 
     async def create_fake_balances(self, portfolio_id: str = "iamrich"):
         await self.balance_service.create_by_qty(
@@ -58,10 +77,12 @@ class TestPositionsOrchestrationEngine:
         assert order is not None
         return leverage, order
 
-    async def test_create_position_by_order(self, database_provider_test):
+    async def test_create_position_by_order(
+        self, database_provider_test, provide_positions_orchestration_engine
+    ):
         leverage, order = await self.create_order_and_leverage()
-        position = await self.positions_orchestration_engine.create_position_by_order(
-            order
+        position = (
+            await provide_positions_orchestration_engine.create_position_by_order(order)
         )
         assert position.entry_price == order.price
         assert position.leverage == 2
@@ -78,17 +99,16 @@ class TestPositionsOrchestrationEngine:
         assert updated_order.position_id == position.id
 
     async def test_liquid_position(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_positions_orchestration_engine
     ):
         leverage, order = await self.create_order_and_leverage()
         assert await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
-        position = await self.positions_orchestration_engine.create_position_by_order(
-            order
+        position = (
+            await provide_positions_orchestration_engine.create_position_by_order(order)
         )
-        await self.positions_orchestration_engine.liquid_position(position)
+        await provide_positions_orchestration_engine.liquid_position(position)
 
         updated_position = await self.position_service.read_by_id(position.id)
         assert updated_position is not None
@@ -105,15 +125,14 @@ class TestPositionsOrchestrationEngine:
         assert updated_balance.frozen == 50
 
     async def test_close_position(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_positions_orchestration_engine
     ):
         leverage, order = await self.create_order_and_leverage()
         assert await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
-        position = await self.positions_orchestration_engine.create_position_by_order(
-            order
+        position = (
+            await provide_positions_orchestration_engine.create_position_by_order(order)
         )
 
         order_schema = OrderSchema(
@@ -126,7 +145,7 @@ class TestPositionsOrchestrationEngine:
             status=OrderStatus.FILLED,
         )
         order = await self.order_service.create(data=order_schema)
-        await self.positions_orchestration_engine.close_position(order, position)
+        await provide_positions_orchestration_engine.close_position(order, position)
 
         updated_position = await self.position_service.read_by_id(position.id)
         assert updated_position is not None
@@ -149,15 +168,14 @@ class TestPositionsOrchestrationEngine:
         assert updated_order.position_id == position.id
 
     async def test_close_partially_position(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_positions_orchestration_engine
     ):
         leverage, order = await self.create_order_and_leverage()
         assert await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
-        position = await self.positions_orchestration_engine.create_position_by_order(
-            order
+        position = (
+            await provide_positions_orchestration_engine.create_position_by_order(order)
         )
 
         order_schema = OrderSchema(
@@ -170,7 +188,7 @@ class TestPositionsOrchestrationEngine:
             status=OrderStatus.FILLED,
         )
         order = await self.order_service.create(data=order_schema)
-        await self.positions_orchestration_engine.close_partially_position(
+        await provide_positions_orchestration_engine.close_partially_position(
             order, position
         )
 
@@ -197,15 +215,14 @@ class TestPositionsOrchestrationEngine:
         assert updated_order.position_id == position.id
 
     async def test_merge_position_with_order(
-        self,
-        database_provider_test,
+        self, database_provider_test, provide_positions_orchestration_engine
     ):
         leverage, order = await self.create_order_and_leverage()
         assert await self.balance_service.lock_balance(
             portfolio_id="iamrich", asset=Asset.USD, locked_qty=300
         )
-        position = await self.positions_orchestration_engine.create_position_by_order(
-            order
+        position = (
+            await provide_positions_orchestration_engine.create_position_by_order(order)
         )
 
         order_schema = OrderSchema(
@@ -218,7 +235,7 @@ class TestPositionsOrchestrationEngine:
             status=OrderStatus.FILLED,
         )
         order = await self.order_service.create(data=order_schema)
-        await self.positions_orchestration_engine.merge_order_with_position(
+        await provide_positions_orchestration_engine.merge_order_with_position(
             order, position
         )
 
@@ -248,10 +265,12 @@ class TestPositionsOrchestrationEngine:
         assert updated_order is not None
         assert updated_order.position_id == position.id
 
-    async def test_apply_order_to_position(self, database_provider_test):
+    async def test_apply_order_to_position(
+        self, database_provider_test, provide_positions_orchestration_engine
+    ):
         leverage, order = await self.create_order_and_leverage()
-        position = await self.positions_orchestration_engine.create_position_by_order(
-            order
+        position = (
+            await provide_positions_orchestration_engine.create_position_by_order(order)
         )
         order_schema = OrderSchema(
             portfolio_id="iamrich",
@@ -265,33 +284,33 @@ class TestPositionsOrchestrationEngine:
         order: Order = await self.order_service.create(data=order_schema)
         assert order is not None
         with patch.object(
-            self.positions_orchestration_engine,
+            provide_positions_orchestration_engine,
             "merge_order_with_position",
             return_value=None,
         ) as mock_method:
-            await self.positions_orchestration_engine.apply_order_to_position(
+            await provide_positions_orchestration_engine.apply_order_to_position(
                 order, position
             )
             mock_method.assert_awaited_once()
 
         order.side = OrderSide.SELL
         with patch.object(
-            self.positions_orchestration_engine,
+            provide_positions_orchestration_engine,
             "close_partially_position",
             return_value=None,
         ) as mock_method:
-            await self.positions_orchestration_engine.apply_order_to_position(
+            await provide_positions_orchestration_engine.apply_order_to_position(
                 order, position
             )
             mock_method.assert_awaited_once()
 
         order.size = 0.5
         with patch.object(
-            self.positions_orchestration_engine,
+            provide_positions_orchestration_engine,
             "close_position",
             return_value=None,
         ) as mock_method:
-            await self.positions_orchestration_engine.apply_order_to_position(
+            await provide_positions_orchestration_engine.apply_order_to_position(
                 order, position
             )
             mock_method.assert_awaited_once()

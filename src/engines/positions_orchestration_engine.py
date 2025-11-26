@@ -1,6 +1,7 @@
-from fifi import MonitoringSHMRepository, log_exception, singleton, BaseEngine
+from typing import Dict
+from fifi import MarketDataRepository, log_exception, singleton, BaseEngine
 from fifi.helpers.get_current_time import GetCurrentTime
-from fifi.enums import Asset, PositionSide, PositionStatus
+from fifi.enums import Asset, Market, PositionSide, PositionStatus
 from fifi.helpers.get_logger import LoggerFactory
 
 from ..helpers.position_helpers import PositionHelpers
@@ -22,6 +23,7 @@ LOGGER = LoggerFactory().get(__name__)
 @singleton
 class PositionsOrchestrationEngine(BaseEngine):
     name: str = "positions_orchestration_engine"
+    md_repos: Dict[Market, MarketDataRepository]
 
     def __init__(self):
         super().__init__(run_in_process=True)
@@ -31,14 +33,16 @@ class PositionsOrchestrationEngine(BaseEngine):
         self.position_service = PositionService()
         self.leverage_service = LeverageService()
         self.processed_orders = set()
+        self.md_repos = dict()
+        for market in self.setting.ACTIVE_MARKETS:
+            self.md_repos[market] = MarketDataRepository(market, "1m")
 
     async def prepare(self):
-        self.mm_repo = MonitoringSHMRepository(
-            create=False, markets=self.setting.ACTIVE_MARKETS
-        )
+        pass
 
     async def postpare(self):
-        self.mm_repo.close()
+        for market, repo in self.md_repos.items():
+            repo.close()
 
     @log_exception()
     async def execute(self):
@@ -68,7 +72,7 @@ class PositionsOrchestrationEngine(BaseEngine):
                     self.processed_orders.add(order.id)
 
             for key, position in open_positions.items():
-                market_last_trade = self.mm_repo.get_last_trade(market=position.market)
+                market_last_trade = self.md_repos[position.market].get_last_trade()
                 if position.side == PositionSide.LONG:
                     if position.lqd_price < market_last_trade:
                         continue

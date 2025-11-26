@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from fifi import MonitoringSHMRepository, log_exception, singleton, BaseEngine
+from fifi import MarketDataRepository, log_exception, singleton, BaseEngine
 from fifi.enums import Market, PositionStatus, OrderSide, OrderStatus, OrderType
 from fifi.helpers.get_logger import LoggerFactory
 
@@ -19,8 +19,9 @@ LOGGER = LoggerFactory().get(__name__)
 
 @singleton
 class MatchingEngine(BaseEngine):
+
     name: str = "matching_engine"
-    mm_repo: MonitoringSHMRepository
+    md_repos: Dict[Market, MarketDataRepository]
 
     def __init__(self):
         super().__init__(run_in_process=True)
@@ -30,14 +31,16 @@ class MatchingEngine(BaseEngine):
         self.order_service = OrderService()
         self.position_service = PositionService()
         self.leverage_service = LeverageService()
+        self.md_repos = dict()
+        for market in self.settings.ACTIVE_MARKETS:
+            self.md_repos[market] = MarketDataRepository(market=market, interval="1m")
 
     async def prepare(self):
-        self.mm_repo = MonitoringSHMRepository(
-            create=False, markets=self.settings.ACTIVE_MARKETS
-        )
+        pass
 
     async def postpare(self):
-        self.mm_repo.close()
+        for market, repo in self.md_repos.items():
+            repo.close()
 
     @log_exception()
     async def execute(self):
@@ -58,12 +61,12 @@ class MatchingEngine(BaseEngine):
                 continue
             elif (
                 order.side == OrderSide.BUY
-                and order.price >= self.mm_repo.get_last_trade(order.market)
+                and order.price >= self.md_repos[order.market].get_last_trade()
             ):
                 await self.fill_order(order)
             elif (
                 order.side == OrderSide.SELL
-                and order.price <= self.mm_repo.get_last_trade(order.market)
+                and order.price <= self.md_repos[order.market].get_last_trade()
             ):
                 await self.fill_order(order)
             else:
@@ -210,7 +213,7 @@ class MatchingEngine(BaseEngine):
 
         # fill market order with incoming price
         if order_type == OrderType.MARKET:
-            order_schema.price = self.mm_repo.get_last_trade(market=market)
+            order_schema.price = self.md_repos[market].get_last_trade()
 
         payment_asset = OrderHelper.get_payment_asset(market=market, side=side)
         checked_open_position = False

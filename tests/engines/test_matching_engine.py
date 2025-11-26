@@ -22,16 +22,23 @@ from tests.materials import *
 LOGGER = LoggerFactory().get(__name__)
 
 
-class MonitoringSHMRepositoryMock:
-    def get_last_trade(self, market):
+class MarketDataRepositoryMock:
+    def __init__(self, market: Market, interval: str) -> None:
+        pass
+
+    def get_last_trade(self):
         return 1100
 
 
 @pytest.fixture
-def provide_matching_engine():
-    matching_engine = MatchingEngine()
-    matching_engine.mm_repo = MonitoringSHMRepositoryMock()
-    yield matching_engine
+def provide_matching_engine(monkeypatch):
+    monkeypatch.setattr(
+        "src.engines.matching_engine.MarketDataRepository", MarketDataRepositoryMock
+    )
+    engine = MatchingEngine()
+    for market in Market:
+        engine.md_repos[market] = MarketDataRepositoryMock(market=market, interval="1m")
+    yield engine
 
 
 @pytest.mark.asyncio
@@ -430,7 +437,9 @@ class TestMatchingEngine:
         self, database_provider_test, provide_matching_engine
     ):
         with patch.object(
-            provide_matching_engine.mm_repo, "get_last_trade", return_value=1100
+            provide_matching_engine.md_repos[Market.BTCUSD],
+            "get_last_trade",
+            return_value=1100,
         ) as mock_trade:
             portfolio = await self.create_fake_portfolio()
             await self.create_fake_balances(portfolio_id=portfolio.id)
@@ -466,7 +475,9 @@ class TestMatchingEngine:
         self, database_provider_test, provide_matching_engine
     ):
         with patch.object(
-            provide_matching_engine.mm_repo, "get_last_trade", return_value=1100
+            provide_matching_engine.md_repos[Market.BTCUSD_PERP],
+            "get_last_trade",
+            return_value=1100,
         ) as mock_trade:
             portfolio = await self.create_fake_portfolio()
             leverage = await self.leverage_service.create_or_update_leverage(
@@ -525,7 +536,7 @@ class TestMatchingEngine:
                     )
                 )
         with patch.object(
-            provide_matching_engine.mm_repo,
+            provide_matching_engine.md_repos[Market.BTCUSD],
             "get_last_trade",
             return_value=1100,
         ) as mock_trade:
